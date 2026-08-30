@@ -1,0 +1,6 @@
+{
+  "name": "Digital Product Studio",
+  "description": "Premium digital product studio specializing in strategy, UX/UI design, engineering, AI products, and automated workflows.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
