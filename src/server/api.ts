@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import express, { Request, Response, NextFunction } from 'express';
 import dbConnect from '../lib/mongodb';
 import Blog from '../lib/models/Blog';
@@ -38,6 +39,30 @@ app.get('/api/blogs', async (req: Request, res: Response) => {
   try {
     const { published } = req.query;
     const query: Record<string, any> = {};
+=======
+import express from 'express';
+import dbConnect from '../lib/mongodb';
+import Blog from '../lib/models/Blog';
+
+const router = express.Router();
+
+// Middleware to ensure DB connection is active before resolving request
+router.use(async (req, res, next) => {
+  try {
+    await dbConnect();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
+
+// GET all blogs
+router.get('/blogs', async (req, res) => {
+  try {
+    const { published } = req.query;
+    const query: any = {};
+>>>>>>> origin/main
     if (published === 'true') {
       query.published = true;
     }
@@ -49,11 +74,20 @@ app.get('/api/blogs', async (req: Request, res: Response) => {
 });
 
 // GET single blog by slug or ID
+<<<<<<< HEAD
 app.get('/api/blogs/:idOrSlug', async (req: Request, res: Response) => {
   try {
     const { idOrSlug } = req.params;
     let blog;
 
+=======
+router.get('/blogs/:idOrSlug', async (req, res) => {
+  try {
+    const { idOrSlug } = req.params;
+    let blog;
+    
+    // Check if ID is valid MongoDB ObjectId
+>>>>>>> origin/main
     if (idOrSlug.match(/^[0-9a-fA-F]{24}$/)) {
       blog = await Blog.findById(idOrSlug);
     } else {
@@ -64,6 +98,10 @@ app.get('/api/blogs/:idOrSlug', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Blog not found' });
     }
 
+<<<<<<< HEAD
+=======
+    // Increment views for frontend read tracking if slug or id is requested
+>>>>>>> origin/main
     blog.views = (blog.views || 0) + 1;
     await blog.save();
 
@@ -73,6 +111,7 @@ app.get('/api/blogs/:idOrSlug', async (req: Request, res: Response) => {
   }
 });
 
+<<<<<<< HEAD
 // POST create blog (Supports standard dashboard and automated MCP/actions)
 app.post('/api/blogs', async (req: Request, res: Response) => {
   try {
@@ -101,12 +140,21 @@ app.post('/api/blogs', async (req: Request, res: Response) => {
 
     await newBlog.save();
     res.status(201).json(newBlog);
+=======
+// POST create blog
+router.post('/blogs', async (req, res) => {
+  try {
+    const blog = new Blog(req.body);
+    await blog.save();
+    res.status(201).json(blog);
+>>>>>>> origin/main
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
 // PUT update blog
+<<<<<<< HEAD
 app.put('/api/blogs/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -115,17 +163,35 @@ app.put('/api/blogs/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Blog not found' });
     }
     res.json(updatedBlog);
+=======
+router.put('/blogs/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const blog = await Blog.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    res.json(blog);
+>>>>>>> origin/main
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
 // DELETE blog
+<<<<<<< HEAD
 app.delete('/api/blogs/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const deleted = await Blog.findByIdAndDelete(id);
     if (!deleted) {
+=======
+router.delete('/blogs/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const blog = await Blog.findByIdAndDelete(id);
+    if (!blog) {
+>>>>>>> origin/main
       return res.status(404).json({ error: 'Blog not found' });
     }
     res.json({ message: 'Blog deleted successfully' });
@@ -134,6 +200,7 @@ app.delete('/api/blogs/:id', async (req: Request, res: Response) => {
   }
 });
 
+<<<<<<< HEAD
 // -------------------------------------------------------------
 // 2. MCP (Model Context Protocol) Endpoint
 // -------------------------------------------------------------
@@ -290,3 +357,6 @@ app.get('/api/openapi.json', (req: Request, res: Response) => {
 });
 
 export default app;
+=======
+export default router;
+>>>>>>> origin/main
