@@ -4,8 +4,8 @@ import express, {
   NextFunction,
 } from 'express';
 
-import dbConnect from './lib/mongodb';
-import Blog from './lib/Blog';
+import dbConnect from './lib/mongodb.ts';
+import Blog from './lib/Blog.ts';
 
 const app = express();
 
