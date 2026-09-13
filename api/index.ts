@@ -20,8 +20,8 @@ import {
 
 import dotenv from 'dotenv';
 
-import dbConnect from './lib/mongodb';
-import Blog from './lib/Blog';
+import dbConnect from './lib/mongodb.js';
+import Blog from './lib/Blog.js';
 
 dotenv.config();
 
