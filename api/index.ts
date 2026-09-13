@@ -4,173 +4,30 @@ import express, {
   NextFunction,
 } from 'express';
 
-import mongoose, {
-  Schema,
-  Document,
-  Model,
-  QueryFilter,
-  UpdateQuery,
-} from 'mongoose';
+import mongoose from 'mongoose';
+
+import {
+  McpServer,
+} from '@modelcontextprotocol/sdk/server/mcp.js';
+
+import {
+  StreamableHTTPServerTransport,
+} from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+
+import {
+  z,
+} from 'zod';
 
 import dotenv from 'dotenv';
-import dns from 'node:dns';
+
+import dbConnect from './lib/mongodb';
+import Blog from './lib/Blog';
 
 dotenv.config();
 
-/**
- * Temporary DNS workaround.
- *
- * Your local DNS resolver was failing MongoDB SRV lookups,
- * while 8.8.8.8 successfully resolved the Atlas SRV record.
- *
- * Keep this for now while we verify production.
- */
-dns.setServers(['8.8.8.8']);
-
-// -----------------------------------------------------------------------------
-// MongoDB configuration
-// -----------------------------------------------------------------------------
-
-const MONGODB_URI = process.env.MONGODB_URI || '';
-
-if (!MONGODB_URI) {
-  console.warn(
-    'Warning: MONGODB_URI is not defined in environment variables.'
-  );
-}
-
-// -----------------------------------------------------------------------------
-// Blog model
-// -----------------------------------------------------------------------------
-
-export interface IBlog extends Document {
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  coverImage: string;
-  author: string;
-  tags: string[];
-  published: boolean;
-  views: number;
-  totalTimeSpent: number;
-  createdAt: Date;
-}
-
-const BlogSchema = new Schema<IBlog>({
-  title: {
-    type: String,
-    required: true,
-  },
-
-  slug: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-
-  excerpt: {
-    type: String,
-    required: true,
-  },
-
-  content: {
-    type: String,
-    required: true,
-  },
-
-  coverImage: {
-    type: String,
-    default: '',
-  },
-
-  author: {
-    type: String,
-    default: 'Ishant Saini',
-  },
-
-  tags: {
-    type: [String],
-    default: [],
-  },
-
-  published: {
-    type: Boolean,
-    default: false,
-  },
-
-  views: {
-    type: Number,
-    default: 0,
-  },
-
-  totalTimeSpent: {
-    type: Number,
-    default: 0,
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-const Blog: Model<IBlog> =
-  (mongoose.models.Blog as Model<IBlog> | undefined) ||
-  mongoose.model<IBlog>('Blog', BlogSchema);
-
-// -----------------------------------------------------------------------------
-// MongoDB connection cache
-// -----------------------------------------------------------------------------
-
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
-declare global {
-  var mongooseCache: MongooseCache | undefined;
-}
-
-let cached = global.mongooseCache;
-
-if (!cached) {
-  cached = global.mongooseCache = {
-    conn: null,
-    promise: null,
-  };
-}
-
-async function dbConnect(): Promise<typeof mongoose> {
-  if (cached!.conn) {
-    return cached!.conn;
-  }
-
-  if (!MONGODB_URI) {
-    throw new Error('MONGODB_URI is not defined in environment variables.');
-  }
-
-  if (!cached!.promise) {
-    cached!.promise = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-    });
-  }
-
-  try {
-    cached!.conn = await cached!.promise;
-  } catch (error) {
-    cached!.promise = null;
-    throw error;
-  }
-
-  return cached!.conn;
-}
-
-// -----------------------------------------------------------------------------
-// Express application
-// -----------------------------------------------------------------------------
+// =============================================================================
+// EXPRESS APPLICATION
+// =============================================================================
 
 const app = express();
 
@@ -180,9 +37,9 @@ app.use(
   })
 );
 
-// -----------------------------------------------------------------------------
-// Database middleware
-// -----------------------------------------------------------------------------
+// =============================================================================
+// DATABASE
+// =============================================================================
 
 app.use(
   async (
@@ -190,155 +47,545 @@ app.use(
     res: Response,
     next: NextFunction
   ) => {
+    // MCP requests also need MongoDB because create_blog_post writes to DB.
     try {
       await dbConnect();
       next();
-    } catch (error: any) {
-      console.error('Database connection error:', error);
+    } catch (error: unknown) {
+      console.error(
+        'Database connection error:',
+        error
+      );
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Unknown database error';
 
       return res.status(500).json({
+        success: false,
         error: 'Database connection failed',
-        details: error?.message || 'Unknown database error',
+        details: message,
       });
     }
   }
 );
 
-// -----------------------------------------------------------------------------
-// Utility functions
-// -----------------------------------------------------------------------------
+// =============================================================================
+// BLOG UTILITIES
+// =============================================================================
 
-function generateSlug(value: string): string {
+function generateSlug(
+  value: string
+): string {
   return value
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '');
 }
 
-// -----------------------------------------------------------------------------
-// Optional API key validation for automated creation tools
-// -----------------------------------------------------------------------------
+/**
+ * Creates a unique slug.
+ *
+ * Example:
+ *
+ * my-blog
+ * my-blog-2
+ * my-blog-3
+ */
+async function generateUniqueSlug(
+  requestedSlug: string
+): Promise<string> {
+  const baseSlug =
+    generateSlug(requestedSlug);
 
-const validateApiKey = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const secret = process.env.BLOG_API_SECRET;
-
-  // No secret configured = allow request.
-  if (!secret) {
-    return next();
+  if (!baseSlug) {
+    throw new Error(
+      'Unable to generate a valid slug.'
+    );
   }
 
-  const authHeader =
-    req.headers.authorization ||
-    req.headers['x-api-key'];
+  let slug = baseSlug;
+  let counter = 2;
 
-  if (
-    !authHeader ||
-    (authHeader !== secret &&
-      authHeader !== `Bearer ${secret}`)
+  while (
+    await Blog.exists({ slug })
   ) {
-    return res.status(401).json({
-      error: 'Unauthorized: Invalid or missing API key',
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+
+    if (counter > 1000) {
+      throw new Error(
+        'Unable to generate a unique slug.'
+      );
+    }
+  }
+
+  return slug;
+}
+
+// =============================================================================
+// STANDARD MCP SERVER
+// =============================================================================
+
+function createMcpServer(): McpServer {
+  const server = new McpServer(
+    {
+      name: 'Ashish Sharma Blog',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
+
+  // ---------------------------------------------------------------------------
+  // CREATE BLOG TOOL
+  // ---------------------------------------------------------------------------
+
+  server.registerTool(
+    'create_blog_post',
+    {
+      title: 'Create Blog Post',
+
+      description:
+        'Create and publish a technical, design, AI, engineering, or software blog post on Ashish Sharma Blog. The tool stores the article in MongoDB.',
+
+      inputSchema: {
+        title: z
+          .string()
+          .min(3)
+          .describe(
+            'The title of the blog post'
+          ),
+
+        slug: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(
+            'Optional URL slug. A unique slug is generated automatically when omitted or when the requested slug already exists.'
+          ),
+
+        excerpt: z
+          .string()
+          .min(10)
+          .describe(
+            'Short SEO-friendly summary of the blog post'
+          ),
+
+        content: z
+          .string()
+          .min(20)
+          .describe(
+            'Full blog content. HTML is supported.'
+          ),
+
+        tags: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Relevant blog categories or tags'
+          ),
+
+        coverImage: z
+          .string()
+          .url()
+          .optional()
+          .or(z.literal(''))
+          .describe(
+            'Optional public cover image URL'
+          ),
+
+        published: z
+          .boolean()
+          .default(true)
+          .describe(
+            'Whether the blog should be published immediately'
+          ),
+
+        author: z
+          .string()
+          .optional()
+          .describe(
+            'Blog author. Defaults to Ashish Sharma.'
+          ),
+      },
+    },
+
+    async ({
+      title,
+      slug,
+      excerpt,
+      content,
+      tags,
+      coverImage,
+      published,
+      author,
+    }) => {
+      try {
+        await dbConnect();
+
+        // Generate a collision-safe slug.
+        const finalSlug =
+          await generateUniqueSlug(
+            slug || title
+          );
+
+        const post =
+          new Blog({
+            title,
+            slug: finalSlug,
+            excerpt,
+            content,
+            coverImage:
+              coverImage || '',
+            author:
+              author ||
+              'Ashish Sharma',
+            tags:
+              Array.isArray(tags)
+                ? tags
+                : [],
+            published:
+              Boolean(published),
+          });
+
+        await post.save();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                `Blog post created successfully.\n\n` +
+                `ID: ${post._id}\n` +
+                `Title: ${post.title}\n` +
+                `Slug: ${post.slug}\n` +
+                `URL: https://www.ashishsharma.shop/blog/${post.slug}\n` +
+                `Status: ${
+                  post.published
+                    ? 'Published'
+                    : 'Draft'
+                }`,
+            },
+          ],
+        };
+      } catch (
+        error: unknown
+      ) {
+        console.error(
+          'create_blog_post error:',
+          error
+        );
+
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Unknown error';
+
+        return {
+          isError: true,
+
+          content: [
+            {
+              type: 'text',
+              text:
+                `Failed to create blog post: ${message}`,
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  return server;
+}
+
+// =============================================================================
+// MCP STREAMABLE HTTP
+// =============================================================================
+
+/**
+ * Standard MCP Streamable HTTP endpoint.
+ *
+ * We use stateless mode because Vercel functions are serverless.
+ *
+ * A fresh transport is created for every POST request.
+ */
+app.post(
+  '/api/mcp',
+  async (
+    req: Request,
+    res: Response
+  ) => {
+    try {
+      /*
+       * Some HTTP MCP clients send only application/json in Accept.
+       *
+       * The SDK's Streamable HTTP implementation may validate that
+       * text/event-stream is also advertised, even when JSON responses
+       * are explicitly enabled.
+       *
+       * Adding it here keeps the endpoint compatible with those clients.
+       */
+      const accept =
+        req.headers.accept || '';
+
+      if (
+        !accept.includes(
+          'text/event-stream'
+        )
+      ) {
+        req.headers.accept =
+          accept
+            ? `${accept}, text/event-stream`
+            : 'application/json, text/event-stream';
+      }
+
+      const server =
+        createMcpServer();
+
+      const transport =
+        new StreamableHTTPServerTransport(
+          {
+            sessionIdGenerator:
+              undefined,
+
+            enableJsonResponse:
+              true,
+          }
+        );
+
+      res.on(
+        'close',
+        () => {
+          transport
+            .close()
+            .catch(() => {});
+        }
+      );
+
+      await server.connect(
+        transport
+      );
+
+      await transport.handleRequest(
+        req,
+        res,
+        req.body
+      );
+    } catch (
+      error: unknown
+    ) {
+      console.error(
+        'MCP Streamable HTTP error:',
+        error
+      );
+
+      if (!res.headersSent) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Internal MCP server error';
+
+        return res.status(500).json({
+          jsonrpc: '2.0',
+
+          error: {
+            code: -32603,
+            message,
+          },
+
+          id: null,
+        });
+      }
+    }
+  }
+);
+
+// =============================================================================
+// MCP GET
+// =============================================================================
+
+/**
+ * Streamable HTTP GET.
+ *
+ * Our server is stateless and does not maintain a persistent
+ * server-to-client notification stream, so GET is not needed
+ * for normal tool execution.
+ */
+app.get(
+  '/api/mcp',
+  (
+    _req: Request,
+    res: Response
+  ) => {
+    return res.status(405).json({
+      error:
+        'MCP GET is not used by this stateless server. Use POST with a valid MCP request.',
     });
   }
-
-  next();
-};
+);
 
 // =============================================================================
-// 1. CORE BLOG REST ENDPOINTS
+// MCP DELETE
+// =============================================================================
+
+app.delete(
+  '/api/mcp',
+  (
+    _req: Request,
+    res: Response
+  ) => {
+    return res.status(405).json({
+      error:
+        'This MCP server is stateless and does not maintain sessions.',
+    });
+  }
+);
+
+// =============================================================================
+// BLOG REST API
 // =============================================================================
 
 // -----------------------------------------------------------------------------
-// GET all blogs
-// GET /api/blogs
-// Optional: ?published=true
+// GET ALL BLOGS
 // -----------------------------------------------------------------------------
 
 app.get(
   '/api/blogs',
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-      const { published } = req.query;
+      const published =
+        req.query.published;
 
-      const query: QueryFilter<IBlog> = {};
+      const filter: {
+        published?: boolean;
+      } = {};
 
-      if (published === 'true') {
-        query.published = true;
+      if (
+        published === 'true'
+      ) {
+        filter.published = true;
       }
 
-      const blogs = await Blog.find(query).sort({
-        createdAt: -1,
-      });
+      const blogs =
+        await Blog.find(filter)
+          .sort({
+            createdAt: -1,
+          })
+          .lean();
 
-      return res.json(blogs);
-    } catch (error: any) {
-      console.error('GET /api/blogs error:', error);
+      return res.status(200).json(
+        blogs
+      );
+    } catch (
+      error: unknown
+    ) {
+      console.error(
+        'GET /api/blogs error:',
+        error
+      );
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch blogs';
 
       return res.status(500).json({
-        error: error?.message || 'Failed to fetch blogs',
+        success: false,
+        error: message,
       });
     }
   }
 );
 
 // -----------------------------------------------------------------------------
-// GET single blog by slug or ID
-// GET /api/blogs/:idOrSlug
+// GET SINGLE BLOG
 // -----------------------------------------------------------------------------
 
 app.get(
   '/api/blogs/:idOrSlug',
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-      const { idOrSlug } = req.params;
+      const {
+        idOrSlug,
+      } = req.params;
 
-      let blog: IBlog | null = null;
+      let blog;
 
-      if (/^[0-9a-fA-F]{24}$/.test(idOrSlug)) {
-        blog = await Blog.findById(idOrSlug);
+      if (
+        /^[0-9a-fA-F]{24}$/.test(
+          idOrSlug
+        )
+      ) {
+        blog =
+          await Blog.findById(
+            idOrSlug
+          );
       } else {
-        blog = await Blog.findOne({
-          slug: idOrSlug,
-        });
+        blog =
+          await Blog.findOne({
+            slug: idOrSlug,
+          });
       }
 
       if (!blog) {
         return res.status(404).json({
+          success: false,
           error: 'Blog not found',
         });
       }
 
-      // Increment view count.
-      blog.views = (blog.views || 0) + 1;
+      blog.views =
+        (blog.views || 0) + 1;
 
       await blog.save();
 
-      return res.json(blog);
-    } catch (error: any) {
+      return res.status(200).json(
+        blog
+      );
+    } catch (
+      error: unknown
+    ) {
       console.error(
         'GET /api/blogs/:idOrSlug error:',
         error
       );
 
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch blog';
+
       return res.status(500).json({
-        error: error?.message || 'Failed to fetch blog',
+        success: false,
+        error: message,
       });
     }
   }
 );
 
 // -----------------------------------------------------------------------------
-// POST create blog
-// POST /api/blogs
+// CREATE BLOG
 // -----------------------------------------------------------------------------
 
 app.post(
   '/api/blogs',
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
       const {
         title,
@@ -351,404 +598,210 @@ app.post(
         published,
       } = req.body;
 
-      if (!title || !excerpt || !content) {
+      if (
+        !title ||
+        !excerpt ||
+        !content
+      ) {
         return res.status(400).json({
+          success: false,
           error:
             'Missing required fields: title, excerpt, or content',
         });
       }
 
-      const finalSlug = generateSlug(
-        slug || title
+      const finalSlug =
+        await generateUniqueSlug(
+          slug || title
+        );
+
+      const newBlog =
+        new Blog({
+          title,
+          slug: finalSlug,
+          excerpt,
+          content,
+          coverImage:
+            coverImage || '',
+          author:
+            author ||
+            'Ashish Sharma',
+          tags:
+            Array.isArray(tags)
+              ? tags
+              : [],
+          published:
+            typeof published ===
+            'boolean'
+              ? published
+              : false,
+        });
+
+      const savedBlog =
+        await newBlog.save();
+
+      return res.status(201).json(
+        savedBlog
+      );
+    } catch (
+      error: unknown
+    ) {
+      console.error(
+        'POST /api/blogs error:',
+        error
       );
 
-      const newBlog = new Blog({
-        title,
-        slug: finalSlug,
-        excerpt,
-        content,
-        coverImage: coverImage || '',
-        author: author || 'Ashish Sharma',
-        tags: Array.isArray(tags) ? tags : [],
-        published:
-          typeof published === 'boolean'
-            ? published
-            : false,
-      });
-
-      await newBlog.save();
-
-      return res.status(201).json(newBlog);
-    } catch (error: any) {
-      console.error('POST /api/blogs error:', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to create blog';
 
       return res.status(400).json({
-        error: error?.message || 'Failed to create blog',
+        success: false,
+        error: message,
       });
     }
   }
 );
 
 // -----------------------------------------------------------------------------
-// PUT update blog
-// PUT /api/blogs/:id
+// UPDATE BLOG
 // -----------------------------------------------------------------------------
 
 app.put(
   '/api/blogs/:id',
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-      const { id } = req.params;
-
-      const update: UpdateQuery<IBlog> = req.body;
-
-      const updatedBlog = await Blog.findByIdAndUpdate(
+      const {
         id,
-        update,
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+      } = req.params;
+
+      const updatedBlog =
+        await Blog.findByIdAndUpdate(
+          id,
+          req.body,
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
 
       if (!updatedBlog) {
         return res.status(404).json({
+          success: false,
           error: 'Blog not found',
         });
       }
 
-      return res.json(updatedBlog);
-    } catch (error: any) {
+      return res.status(200).json(
+        updatedBlog
+      );
+    } catch (
+      error: unknown
+    ) {
       console.error(
         'PUT /api/blogs/:id error:',
         error
       );
 
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to update blog';
+
       return res.status(400).json({
-        error: error?.message || 'Failed to update blog',
+        success: false,
+        error: message,
       });
     }
   }
 );
 
 // -----------------------------------------------------------------------------
-// DELETE blog
-// DELETE /api/blogs/:id
+// DELETE BLOG
 // -----------------------------------------------------------------------------
 
 app.delete(
   '/api/blogs/:id',
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-      const { id } = req.params;
+      const {
+        id,
+      } = req.params;
 
-      const deleted = await Blog.findByIdAndDelete(id);
+      const deleted =
+        await Blog.findByIdAndDelete(
+          id
+        );
 
       if (!deleted) {
         return res.status(404).json({
+          success: false,
           error: 'Blog not found',
         });
       }
 
-      return res.json({
-        message: 'Blog deleted successfully',
+      return res.status(200).json({
+        success: true,
+        message:
+          'Blog deleted successfully',
       });
-    } catch (error: any) {
+    } catch (
+      error: unknown
+    ) {
       console.error(
         'DELETE /api/blogs/:id error:',
         error
       );
 
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete blog';
+
       return res.status(500).json({
-        error: error?.message || 'Failed to delete blog',
+        success: false,
+        error: message,
       });
     }
   }
 );
 
 // =============================================================================
-// 2. MCP ENDPOINT
+// OPENAPI
 // =============================================================================
-
-// -----------------------------------------------------------------------------
-// POST /api/mcp
-// -----------------------------------------------------------------------------
-
-app.post(
-  '/api/mcp',
-  validateApiKey,
-  async (req: Request, res: Response) => {
-    try {
-      const {
-        jsonrpc,
-        method,
-        params,
-        id,
-      } = req.body || {};
-
-      // -----------------------------------------------------------------------
-      // Validate JSON-RPC request
-      // -----------------------------------------------------------------------
-
-      if (jsonrpc !== '2.0') {
-        return res.status(400).json({
-          jsonrpc: '2.0',
-          id,
-          error: {
-            code: -32600,
-            message: 'Invalid Request',
-          },
-        });
-      }
-
-      // -----------------------------------------------------------------------
-      // MCP tools/list
-      // -----------------------------------------------------------------------
-
-      if (method === 'tools/list') {
-        return res.json({
-          jsonrpc: '2.0',
-          id,
-          result: {
-            tools: [
-              {
-                name: 'create_blog_post',
-
-                description:
-                  'Creates a new technical or design blog post on the studio platform with Markdown/HTML formatting.',
-
-                inputSchema: {
-                  type: 'object',
-
-                  properties: {
-                    title: {
-                      type: 'string',
-                      description:
-                        'The title of the blog post',
-                    },
-
-                    slug: {
-                      type: 'string',
-                      description:
-                        'URL slug (e.g. optimizing-nextjs-15-caching)',
-                    },
-
-                    excerpt: {
-                      type: 'string',
-                      description:
-                        'Short 1-2 sentence SEO excerpt',
-                    },
-
-                    content: {
-                      type: 'string',
-                      description:
-                        'Full HTML/rich text content with h2, h3, p, ul, code tags',
-                    },
-
-                    tags: {
-                      type: 'array',
-                      items: {
-                        type: 'string',
-                      },
-                      description:
-                        'Relevant category tags',
-                    },
-
-                    coverImage: {
-                      type: 'string',
-                      description:
-                        'Direct image URL for post banner',
-                    },
-
-                    published: {
-                      type: 'boolean',
-                      description:
-                        'True to publish immediately, false for draft',
-                    },
-
-                    author: {
-                      type: 'string',
-                      description:
-                        'Author name (default: Ashish Sharma)',
-                    },
-                  },
-
-                  required: [
-                    'title',
-                    'excerpt',
-                    'content',
-                  ],
-                },
-              },
-            ],
-          },
-        });
-      }
-
-      // -----------------------------------------------------------------------
-      // MCP tools/call
-      // -----------------------------------------------------------------------
-
-      if (method === 'tools/call') {
-        const {
-          name,
-          arguments: args,
-        } = params || {};
-
-        if (name === 'create_blog_post') {
-          try {
-            if (
-              !args ||
-              !args.title ||
-              !args.excerpt ||
-              !args.content
-            ) {
-              return res.json({
-                jsonrpc: '2.0',
-                id,
-                result: {
-                  isError: true,
-                  content: [
-                    {
-                      type: 'text',
-                      text:
-                        'Failed to create blog post: title, excerpt, and content are required.',
-                    },
-                  ],
-                },
-              });
-            }
-
-            const finalSlug = generateSlug(
-              args.slug || args.title
-            );
-
-            const post = new Blog({
-              title: args.title,
-              slug: finalSlug,
-              excerpt: args.excerpt,
-              content: args.content,
-              coverImage:
-                args.coverImage || '',
-              author:
-                args.author || 'Ashish Sharma',
-              tags: Array.isArray(args.tags)
-                ? args.tags
-                : [],
-              published: Boolean(
-                args.published
-              ),
-            });
-
-            await post.save();
-
-            return res.json({
-              jsonrpc: '2.0',
-              id,
-              result: {
-                content: [
-                  {
-                    type: 'text',
-                    text:
-                      `Blog post created successfully with ID ${post._id} and slug '${post.slug}'. Status: ${
-                        post.published
-                          ? 'Published'
-                          : 'Draft'
-                      }.`,
-                  },
-                ],
-              },
-            });
-          } catch (error: any) {
-            console.error(
-              'MCP create_blog_post error:',
-              error
-            );
-
-            return res.json({
-              jsonrpc: '2.0',
-              id,
-              result: {
-                isError: true,
-                content: [
-                  {
-                    type: 'text',
-                    text:
-                      `Failed to create blog post: ${
-                        error?.message ||
-                        'Unknown error'
-                      }`,
-                  },
-                ],
-              },
-            });
-          }
-        }
-
-        return res.status(404).json({
-          jsonrpc: '2.0',
-          id,
-          error: {
-            code: -32601,
-            message: `Tool '${name}' not found`,
-          },
-        });
-      }
-
-      return res.status(400).json({
-        jsonrpc: '2.0',
-        id,
-        error: {
-          code: -32601,
-          message: 'Method not supported',
-        },
-      });
-    } catch (error: any) {
-      console.error(
-        'POST /api/mcp error:',
-        error
-      );
-
-      return res.status(500).json({
-        jsonrpc: '2.0',
-        id: req.body?.id,
-        error: {
-          code: -32603,
-          message:
-            error?.message ||
-            'Internal server error',
-        },
-      });
-    }
-  }
-);
-
-// =============================================================================
-// 3. OPENAPI 3.0 MANIFEST
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// GET /api/openapi.json
-// -----------------------------------------------------------------------------
 
 app.get(
   '/api/openapi.json',
-  (req: Request, res: Response) => {
+  (
+    req: Request,
+    res: Response
+  ) => {
     const host =
       req.headers.host ||
       'localhost:3000';
 
     const forwardedProto =
-      req.headers['x-forwarded-proto'];
+      req.headers[
+        'x-forwarded-proto'
+      ];
 
-    const protocol = Array.isArray(
-      forwardedProto
-    )
-      ? forwardedProto[0]
-      : forwardedProto ||
-        (process.env.NODE_ENV === 'production'
-          ? 'https'
-          : 'http');
+    const protocol =
+      Array.isArray(
+        forwardedProto
+      )
+        ? forwardedProto[0]
+        : forwardedProto ||
+          (process.env.NODE_ENV ===
+          'production'
+            ? 'https'
+            : 'http');
 
     return res.json({
       openapi: '3.0.0',
@@ -758,9 +811,9 @@ app.get(
           'Digital Product Studio Blog API',
 
         description:
-          'API for creating and managing studio blog articles and case studies.',
+          'API for managing Ashish Sharma blog articles.',
 
-        version: '1.0.0',
+        version: '2.0.0',
       },
 
       servers: [
@@ -772,35 +825,11 @@ app.get(
       paths: {
         '/api/blogs': {
           get: {
-            operationId: 'getBlogs',
+            operationId:
+              'getBlogs',
 
             summary:
               'Get all blog posts',
-
-            parameters: [
-              {
-                name: 'published',
-                in: 'query',
-                required: false,
-                schema: {
-                  type: 'boolean',
-                },
-                description:
-                  'Filter published posts',
-              },
-            ],
-
-            responses: {
-              '200': {
-                description:
-                  'List of blog posts',
-              },
-
-              '500': {
-                description:
-                  'Database error',
-              },
-            },
           },
 
           post: {
@@ -809,87 +838,6 @@ app.get(
 
             summary:
               'Create a new blog post',
-
-            requestBody: {
-              required: true,
-
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-
-                    required: [
-                      'title',
-                      'excerpt',
-                      'content',
-                    ],
-
-                    properties: {
-                      title: {
-                        type: 'string',
-                        description:
-                          'Article title',
-                      },
-
-                      slug: {
-                        type: 'string',
-                        description:
-                          'Unique URL slug',
-                      },
-
-                      excerpt: {
-                        type: 'string',
-                        description:
-                          'Short summary for SEO cards',
-                      },
-
-                      content: {
-                        type: 'string',
-                        description:
-                          'Rich HTML content (h2, h3, p, ul, etc.)',
-                      },
-
-                      tags: {
-                        type: 'array',
-                        items: {
-                          type: 'string',
-                        },
-                      },
-
-                      coverImage: {
-                        type: 'string',
-                        description:
-                          'Image URL',
-                      },
-
-                      published: {
-                        type: 'boolean',
-                        description:
-                          'Set true to publish or false for draft',
-                      },
-
-                      author: {
-                        type: 'string',
-                        default:
-                          'Ashish Sharma',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-
-            responses: {
-              '201': {
-                description:
-                  'Blog post created successfully',
-              },
-
-              '400': {
-                description:
-                  'Validation error',
-              },
-            },
           },
         },
 
@@ -899,147 +847,27 @@ app.get(
               'getBlog',
 
             summary:
-              'Get a blog post by ID or slug',
-
-            parameters: [
-              {
-                name:
-                  'idOrSlug',
-
-                in: 'path',
-
-                required: true,
-
-                schema: {
-                  type: 'string',
-                },
-              },
-            ],
-
-            responses: {
-              '200': {
-                description:
-                  'Blog post',
-              },
-
-              '404': {
-                description:
-                  'Blog not found',
-              },
-            },
+              'Get a blog post',
           },
         },
 
-        '/api/blogs/{id}': {
-          put: {
+        '/api/mcp': {
+          post: {
             operationId:
-              'updateBlog',
+              'mcpEndpoint',
 
             summary:
-              'Update a blog post',
-
-            parameters: [
-              {
-                name: 'id',
-                in: 'path',
-                required: true,
-                schema: {
-                  type: 'string',
-                },
-              },
-            ],
-
-            requestBody: {
-              required: true,
-
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-
-                    properties: {
-                      title: {
-                        type: 'string',
-                      },
-
-                      slug: {
-                        type: 'string',
-                      },
-
-                      excerpt: {
-                        type: 'string',
-                      },
-
-                      content: {
-                        type: 'string',
-                      },
-
-                      coverImage: {
-                        type: 'string',
-                      },
-
-                      author: {
-                        type: 'string',
-                      },
-
-                      tags: {
-                        type: 'array',
-                        items: {
-                          type: 'string',
-                        },
-                      },
-
-                      published: {
-                        type: 'boolean',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-
-            responses: {
-              '200': {
-                description:
-                  'Updated blog post',
-              },
-
-              '404': {
-                description:
-                  'Blog not found',
-              },
-            },
+              'MCP Streamable HTTP endpoint',
           },
+        },
 
-          delete: {
+        '/api/health': {
+          get: {
             operationId:
-              'deleteBlog',
+              'healthCheck',
 
             summary:
-              'Delete a blog post',
-
-            parameters: [
-              {
-                name: 'id',
-                in: 'path',
-                required: true,
-                schema: {
-                  type: 'string',
-                },
-              },
-            ],
-
-            responses: {
-              '200': {
-                description:
-                  'Blog deleted successfully',
-              },
-
-              '404': {
-                description:
-                  'Blog not found',
-              },
-            },
+              'API and MongoDB health check',
           },
         },
       },
@@ -1048,23 +876,74 @@ app.get(
 );
 
 // =============================================================================
-// HEALTH CHECK
+// HEALTH
 // =============================================================================
 
-// Useful for quickly verifying that Vercel can invoke the function.
 app.get(
   '/api/health',
-  (req: Request, res: Response) => {
-    return res.json({
-      ok: true,
-      service: 'Digital Product Studio Blog API',
-      database:
-        mongoose.connection.readyState === 1
+  async (
+    _req: Request,
+    res: Response
+  ) => {
+    try {
+      await dbConnect();
+
+      const connected =
+        mongoose.connection
+          .readyState === 1;
+
+      return res.status(
+        connected ? 200 : 503
+      ).json({
+        ok: connected,
+
+        service:
+          'Digital Product Studio Blog API',
+
+        database: connected
           ? 'connected'
           : 'disconnected',
-      timestamp:
-        new Date().toISOString(),
-    });
+
+        databaseName:
+          mongoose.connection.db
+            ?.databaseName ||
+          null,
+
+        host:
+          mongoose.connection.host ||
+          null,
+
+        timestamp:
+          new Date().toISOString(),
+      });
+    } catch (
+      error: unknown
+    ) {
+      console.error(
+        'Health check error:',
+        error
+      );
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Unknown database error';
+
+      return res.status(500).json({
+        ok: false,
+
+        service:
+          'Digital Product Studio Blog API',
+
+        database:
+          'disconnected',
+
+        error: message,
+
+        timestamp:
+          new Date().toISOString(),
+      });
+    }
   }
 );
 
@@ -1074,7 +953,7 @@ app.get(
 
 app.use(
   (
-    error: any,
+    error: unknown,
     req: Request,
     res: Response,
     next: NextFunction
@@ -1084,14 +963,20 @@ app.use(
       error
     );
 
-    if (res.headersSent) {
+    if (
+      res.headersSent
+    ) {
       return next(error);
     }
 
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Internal server error';
+
     return res.status(500).json({
-      error:
-        error?.message ||
-        'Internal server error',
+      success: false,
+      error: message,
     });
   }
 );

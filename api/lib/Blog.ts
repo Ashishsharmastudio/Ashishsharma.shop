@@ -1,10 +1,10 @@
 import mongoose, {
   Schema,
   Document,
+  Model,
 } from 'mongoose';
 
-export interface IBlog
-  extends Document {
+export interface IBlog extends Document {
   title: string;
   slug: string;
   excerpt: string;
@@ -19,66 +19,82 @@ export interface IBlog
 }
 
 const BlogSchema =
-  new Schema<IBlog>({
-    title: {
-      type: String,
-      required: true,
-    },
+  new Schema<IBlog>(
+    {
+      title: {
+        type: String,
+        required: true,
+        trim: true,
+      },
 
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+      slug: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+      },
 
-    excerpt: {
-      type: String,
-      required: true,
-    },
+      excerpt: {
+        type: String,
+        required: true,
+        trim: true,
+      },
 
-    content: {
-      type: String,
-      required: true,
-    },
+      content: {
+        type: String,
+        required: true,
+      },
 
-    coverImage: {
-      type: String,
-      default: '',
-    },
+      coverImage: {
+        type: String,
+        default: '',
+      },
 
-    author: {
-      type: String,
-      default: 'Ishant Saini',
-    },
+      author: {
+        type: String,
+        default: 'Ishant Saini',
+        trim: true,
+      },
 
-    tags: {
-      type: [String],
-      default: [],
-    },
+      tags: {
+        type: [String],
+        default: [],
+      },
 
-    published: {
-      type: Boolean,
-      default: false,
-    },
+      published: {
+        type: Boolean,
+        default: false,
+      },
 
-    views: {
-      type: Number,
-      default: 0,
-    },
+      views: {
+        type: Number,
+        default: 0,
+      },
 
-    totalTimeSpent: {
-      type: Number,
-      default: 0,
-    },
+      totalTimeSpent: {
+        type: Number,
+        default: 0,
+      },
 
-    createdAt: {
-      type: Date,
-      default: Date.now,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
     },
-  });
+    {
+      timestamps: false,
+    }
+  );
 
-const Blog =
-  mongoose.models.Blog ||
+/**
+ * Explicitly type the existing model.
+ *
+ * Without this cast, Mongoose 9 can infer a union between
+ * Model<any> and Model<IBlog>, which causes errors on
+ * find(), findById(), findByIdAndUpdate(), etc.
+ */
+const Blog: Model<IBlog> =
+  (mongoose.models.Blog as Model<IBlog> | undefined) ??
   mongoose.model<IBlog>(
     'Blog',
     BlogSchema
