@@ -8,7 +8,7 @@ import mongoose, {
   Schema,
   Document,
   Model,
-  FilterQuery,
+  QueryFilter,
   UpdateQuery,
 } from 'mongoose';
 
@@ -264,7 +264,7 @@ app.get(
     try {
       const { published } = req.query;
 
-      const query: FilterQuery<IBlog> = {};
+      const query: QueryFilter<IBlog> = {};
 
       if (published === 'true') {
         query.published = true;

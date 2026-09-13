@@ -2,31 +2,34 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
-import app from './api/index';
 
 export default defineConfig(() => {
   return {
     plugins: [
       react(),
       tailwindcss(),
-      {
-        name: 'express-api',
-        configureServer(server) {
-          server.middlewares.use(app);
-        },
-      },
     ],
+
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
     },
+
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
+
       watch:
         process.env.DISABLE_HMR === 'true'
           ? null
           : {},
+
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
+      },
     },
   };
 });
