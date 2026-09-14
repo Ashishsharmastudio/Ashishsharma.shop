@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { RouterProvider, useRouter } from './lib/router';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -40,6 +41,29 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1234567890-pl
 
 function MainAppContent() {
   const { path } = useRouter();
+
+  // Synchronize document.title dynamically with route path
+  useEffect(() => {
+    const routeTitles: Record<string, string> = {
+      '/': 'Ashish Sharma — AI Systems Engineer & Technical Architect',
+      '/about': 'About Ashish Sharma — Lead AI Systems Engineer & Fractional CTO',
+      '/services': 'Services & Modules — AI Systems Engineering & Custom Platforms',
+      '/work': 'Client Case Studies & Verified Systems Proof — Ashish Sharma',
+      '/blog': 'Engineering Insights & Technical Architecture Blog — Ashish Sharma',
+      '/lab': 'R&D Lab & Web Experiments — Ashish Sharma Studio',
+      '/contact': 'Book an Architecture Discovery Call — Ashish Sharma',
+    };
+
+    if (routeTitles[path]) {
+      document.title = routeTitles[path];
+    } else if (path.startsWith('/work/')) {
+      const slug = path.split('/work/')[1] || '';
+      document.title = `${slug.replace(/-/g, ' ').toUpperCase()} Case Study — Ashish Sharma`;
+    } else if (path.startsWith('/blog/')) {
+      const slug = path.split('/blog/')[1] || '';
+      document.title = `${slug.replace(/-/g, ' ').toUpperCase()} Article — Ashish Sharma`;
+    }
+  }, [path]);
 
   // Simple SPA dynamic router switch
   const renderActiveRoute = () => {

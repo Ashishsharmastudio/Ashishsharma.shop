@@ -35,7 +35,7 @@ export default function BlogForm({ initialData, isEditing = false }: BlogFormPro
         excerpt: "",
         content: "",
         coverImage: "",
-        author: "Ishant Saini",
+        author: "Ashish Sharma",
         tags: "",
         published: false,
     });

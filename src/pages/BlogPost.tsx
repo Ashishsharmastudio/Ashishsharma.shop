@@ -3,11 +3,11 @@ import { useRouter } from '../lib/router';
 import { getBlogById, Blog } from '../lib/blogStore';
 import { Calendar, User, ArrowLeft, ArrowUpRight } from 'lucide-react';
 
-interface Props {
+interface BlogPostProps {
   slug: string;
 }
 
-export default function BlogPost({ slug }: Props) {
+export default function BlogPost({ slug }: BlogPostProps) {
   const { navigate } = useRouter();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +27,41 @@ export default function BlogPost({ slug }: Props) {
     };
     fetchBlog();
   }, [slug]);
+
+  // Synchronize document title and inject dynamic BlogPosting JSON-LD for rich snippets
+  useEffect(() => {
+    if (blog) {
+      document.title = `${blog.title} — Ashish Sharma, AI Systems Engineer`;
+
+      const scriptId = 'blog-post-ld';
+      let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = scriptId;
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": blog.title,
+        "description": blog.excerpt,
+        "image": blog.coverImage || "https://ashishsharma.shop/og-banner.png",
+        "author": {
+          "@type": "Person",
+          "name": "Ashish Sharma",
+          "url": "https://ashishsharma.shop/"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ashish Sharma Digital Product Studio",
+          "url": "https://ashishsharma.shop/"
+        },
+        "datePublished": blog.createdAt,
+        "mainEntityOfPage": `https://ashishsharma.shop/blog/${blog.slug}`
+      });
+    }
+  }, [blog]);
 
   if (loading) {
     return (

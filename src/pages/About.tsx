@@ -42,7 +42,7 @@ export default function About() {
         </div>
         <div className="lg:col-span-7 space-y-6">
           <h3 className="text-2xl md:text-3xl font-display font-medium text-white">
-            We operate at the intersections of strategy, software engineering, and artificial intelligence.
+            I am Ashish Sharma, an AI Systems Engineer operating at the intersection of strategy, software engineering, and artificial intelligence.
           </h3>
           <p className="text-sm md:text-base text-studio-text-secondary leading-relaxed">
             Founded by a veteran team of designers and systems architects, we observed that traditional digital agencies were bloated, slow, and divided by organizational silos. Designers threw mockups over the fence, and developers wrote compromises.
@@ -76,44 +76,94 @@ export default function About() {
         </div>
       </section>
 
-      {/* Leadership profiles */}
+      {/* Leadership Profile: Ashish Sharma */}
       <section className="mb-12">
-        <span className="font-mono text-xs uppercase tracking-widest text-studio-accent mb-10 block">// Leadership</span>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <span className="font-mono text-xs uppercase tracking-widest text-studio-accent mb-10 block">// Principal Systems Architect</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Member 1 */}
-          <div className="space-y-6 bg-studio-card/25 border border-studio-border rounded-2xl p-6 md:p-8">
-            <div className="aspect-square w-full rounded-xl bg-gradient-to-tr from-slate-900 via-neutral-950 to-blue-950/40 relative overflow-hidden flex items-center justify-center">
-              <span className="font-display font-black text-6xl text-white/5 uppercase select-none">DZ</span>
-              <div className="absolute inset-0 noise-bg opacity-[0.03] pointer-events-none" />
-              <div className="absolute bottom-4 left-4 font-mono text-[9px] text-white/30">
-                ASHISH SHARMA // CO-FOUNDER
+          <div className="lg:col-span-8 space-y-6 bg-studio-card/30 border border-studio-border rounded-2xl p-6 md:p-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-studio-border/40 pb-6">
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-display font-medium text-white">
+                  Ashish Sharma
+                </h3>
+                <span className="font-mono text-xs text-studio-accent block mt-1">
+                  Lead AI Systems Engineer &amp; Fractional CTO
+                </span>
+              </div>
+              <div className="flex gap-3 font-mono text-xs">
+                <a
+                  href="https://github.com/Ashishsharmastudio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-lg border border-studio-border bg-white/5 text-white hover:border-white/30 transition-colors"
+                >
+                  GitHub ↗
+                </a>
+                <a
+                  href="https://cal.com/ashish-sharma-2000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-lg bg-studio-accent text-white font-medium hover:bg-studio-accent/90 transition-colors"
+                >
+                  Book Call
+                </a>
               </div>
             </div>
-            <div>
-              <h4 className="font-display font-medium text-xl text-white">David Zuniga</h4>
-              <span className="font-mono text-xs text-studio-accent block mt-0.5 mb-3">Creative Director & Lead UX Architect</span>
-              <p className="text-xs md:text-sm text-studio-text-secondary leading-relaxed">
-                David has spent 15+ years orchestrating digital designs and user strategies for high-growth tech platforms. He focuses on typography rhythms, responsive visual systems, and motion structures.
-              </p>
+
+            <p className="text-sm md:text-base text-studio-text-secondary leading-relaxed font-sans">
+              Ashish Sharma is a Lead AI Systems Engineer and Fractional CTO who designs, architects, and ships production-grade AI systems, real-time voice agents, and decoupled high-performance platforms for enterprise clients globally.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-xl bg-black/40 border border-studio-border/50">
+                <div className="text-xs font-mono text-studio-accent uppercase mb-1">Pillar Expertise</div>
+                <p className="text-xs text-studio-text-secondary leading-relaxed">
+                  Zero-hallucination RAG pipelines, sub-500ms WebRTC voice bots, and remote Model Context Protocol (MCP) servers with automated token rotation.
+                </p>
+              </div>
+              <div className="p-4 rounded-xl bg-black/40 border border-studio-border/50">
+                <div className="text-xs font-mono text-studio-accent uppercase mb-1">Production Proof-of-Work</div>
+                <p className="text-xs text-studio-text-secondary leading-relaxed">
+                  Shipped clinical triage for Fly4Smiles, wealth stress-testing for Capital Insights Dublin, and FAA Part 145 compliance for Rotor Wing Services.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Member 2 */}
-          <div className="space-y-6 bg-studio-card/25 border border-studio-border rounded-2xl p-6 md:p-8">
-            <div className="aspect-square w-full rounded-xl bg-gradient-to-tr from-neutral-950 via-slate-900 to-indigo-950/40 relative overflow-hidden flex items-center justify-center">
-              <span className="font-display font-black text-6xl text-white/5 uppercase select-none">AM</span>
-              <div className="absolute inset-0 noise-bg opacity-[0.03] pointer-events-none" />
-              <div className="absolute bottom-4 left-4 font-mono text-[9px] text-white/30">
-                ASHISH SHARMA // CO-FOUNDER
+          <div className="lg:col-span-4 space-y-6">
+            {/* Real Headshot Image Card */}
+            <div className="bg-studio-card/30 border border-studio-border/40 rounded-2xl overflow-hidden shadow-xl">
+              <div className="aspect-square w-full relative overflow-hidden bg-neutral-900">
+                <img 
+                  src="/profile-headshot.jpg" 
+                  alt="Ashish Sharma - AI Systems Engineer" 
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+              <div className="p-4 text-center font-mono text-[10px] text-studio-text-secondary border-t border-studio-border/30">
+                ASHISH SHARMA // LEAD ARCHITECT
               </div>
             </div>
-            <div>
-              <h4 className="font-display font-medium text-xl text-white">Alistair McArthur</h4>
-              <span className="font-mono text-xs text-studio-accent block mt-0.5 mb-3">Technical Director & Lead Systems Architect</span>
-              <p className="text-xs md:text-sm text-studio-text-secondary leading-relaxed">
-                Alistair is an expert systems architect specializing in high-speed web pipelines, multi-agent LLM systems, secure cloud databases, and telemetry collection engines. He compiles solutions that scale effortlessly.
-              </p>
+
+            <div className="bg-studio-card/20 border border-studio-border/40 rounded-2xl p-6 space-y-4">
+              <div className="font-mono text-xs text-white uppercase tracking-wider">// Verified Credentials</div>
+              <div className="space-y-3 font-mono text-xs text-studio-text-secondary">
+                <div>
+                  <span className="text-white block font-sans">Specialization</span>
+                  AI Systems &amp; Platform Engineering
+                </div>
+                <div>
+                  <span className="text-white block font-sans">Primary Stack</span>
+                  Python, FastAPI, Next.js, LangGraph, WebRTC
+                </div>
+                <div>
+                  <span className="text-white block font-sans">Direct Channel</span>
+                  <a href="mailto:ashishsharmastudio@gmail.com" className="text-studio-accent underline">
+                    ashishsharmastudio@gmail.com
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -52,7 +52,7 @@ const BlogSchema =
 
       author: {
         type: String,
-        default: 'Ishant Saini',
+        default: 'Ashish Sharma',
         trim: true,
       },
 

@@ -20,7 +20,7 @@ const BlogSchema: Schema = new Schema({
   excerpt: { type: String, required: true },
   content: { type: String, required: true },
   coverImage: { type: String },
-  author: { type: String, default: 'Ishant Saini' },
+  author: { type: String, default: 'Ashish Sharma' },
   tags: { type: [String], default: [] },
   published: { type: Boolean, default: false },
   views: { type: Number, default: 0 },

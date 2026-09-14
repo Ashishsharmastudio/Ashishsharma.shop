@@ -162,11 +162,11 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-studio-border bg-studio-card mb-6"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-studio-border bg-studio-card mb-6"
           >
             <span className="w-2 h-2 rounded-full bg-studio-accent animate-pulse" />
-            <span className="font-mono text-[10px] uppercase tracking-wider text-studio-text-secondary">
-              Independent Digital Product Studio
+            <span className="font-mono text-[11px] uppercase tracking-wider text-studio-text-secondary">
+              Ashish Sharma // AI Systems Engineer &amp; Platform Architect
             </span>
           </motion.div>
 
@@ -176,9 +176,9 @@ export default function Hero() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
             className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-medium tracking-tight text-white leading-[1.05] mb-8"
           >
-            Designing digital products that{' '}
+            Engineering intelligent AI systems that{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-studio-accent via-blue-400 to-indigo-400">
-              move businesses forward
+              survive production scale
             </span>
             .
           </motion.h1>
@@ -189,9 +189,7 @@ export default function Hero() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
             className="text-lg sm:text-xl md:text-2xl text-studio-text-secondary font-sans leading-relaxed max-w-3xl mb-10"
           >
-            We partner with ambitious teams to engineer bespoke web applications,
-            intelligent AI products, autonomous workflows, and immersive design systems.
-            We operate at the intersections of design, performance, and strategy.
+            Ashish Sharma designs and deploys zero-hallucination RAG pipelines, sub-500ms WebRTC voice agents, and decoupled Next.js platforms for enterprise teams and domain consultancies worldwide.
           </motion.p>
 
           <motion.div
