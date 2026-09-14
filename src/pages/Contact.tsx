@@ -75,8 +75,8 @@ export default function Contact() {
             <div className="space-y-3 font-sans text-sm text-studio-text-secondary">
               <p>
                 Inquiries:{' '}
-                <a href="mailto:divyanshusaini890@gmail.com" className="text-white hover:text-studio-accent transition-colors">
-                  divyanshusaini890@gmail.com
+                <a href="mailto:ashishsharmastudio@gmail.com" className="text-white hover:text-studio-accent transition-colors">
+                  ashishsharmastudio@gmail.com
                 </a>
               </p>
               <p>
@@ -170,7 +170,7 @@ export default function Contact() {
                       value={formData.website}
                       onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                       className="w-full bg-[#111] border border-studio-border focus:border-studio-accent rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors"
-                      placeholder="https://company.com"
+                      placeholder="https://www.blossombasket.in"
                     />
                   </div>
                 </div>
