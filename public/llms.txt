@@ -1,0 +1,67 @@
+# Ashish Sharma
+
+> Personal website, portfolio, and engineering blog of Ashish Sharma.
+
+## About
+
+Ashish Sharma is a software developer focused on building modern web applications, full-stack systems, AI-integrated applications, and production-ready software solutions.
+
+## Website
+
+- https://ashishsharma.shop/
+
+## About Me
+
+- https://ashishsharma.shop/about
+
+## Services
+
+- https://ashishsharma.shop/services
+
+## Work
+
+- https://ashishsharma.shop/work
+
+## Blog
+
+- https://ashishsharma.shop/blog
+
+## Contact
+
+- https://ashishsharma.shop/contact
+
+## Featured Articles
+
+- https://ashishsharma.shop/blog/production-rag-architecture-zero-hallucinations
+- https://ashishsharma.shop/blog/production-real-time-voice-ai-agent-architecture
+- https://ashishsharma.shop/blog/enterprise-mcp-server-architecture-production-security
+- https://ashishsharma.shop/blog/enterprise-ai-agent-architecture-deterministic-state-machines
+- https://ashishsharma.shop/blog/why-consultancies-outgrow-wordpress-decoupled-platforms
+
+## Content
+
+The website contains:
+- Software development information
+- Full-stack development content
+- AI and AI-agent architecture articles
+- RAG and MCP architecture content
+- Web development and engineering articles
+- Projects and professional work
+
+## Preferred Content
+
+For understanding the website, prioritize:
+1. About
+2. Services
+3. Work
+4. Blog
+5. Individual blog articles
+6. Contact
+
+## Sitemap
+
+- https://ashishsharma.shop/sitemap.xml
+
+## Robots
+
+- https://ashishsharma.shop/robots.txt
