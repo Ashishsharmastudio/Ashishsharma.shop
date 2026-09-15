@@ -46,19 +46,19 @@ export default function BlogPost({ slug }: BlogPostProps) {
         "@type": "BlogPosting",
         "headline": blog.title,
         "description": blog.excerpt,
-        "image": blog.coverImage || "https://ashishsharma.shop/og-banner.png",
+        "image": blog.coverImage || "https://www.ashishsharma.shop/og-banner.png",
         "author": {
           "@type": "Person",
           "name": "Ashish Sharma",
-          "url": "https://ashishsharma.shop/"
+          "url": "https://www.ashishsharma.shop/"
         },
         "publisher": {
           "@type": "Organization",
           "name": "Ashish Sharma Digital Product Studio",
-          "url": "https://ashishsharma.shop/"
+          "url": "https://www.ashishsharma.shop/"
         },
         "datePublished": blog.createdAt,
-        "mainEntityOfPage": `https://ashishsharma.shop/blog/${blog.slug}`
+        "mainEntityOfPage": `https://www.ashishsharma.shop/blog/${blog.slug}`
       });
     }
   }, [blog]);
@@ -75,7 +75,7 @@ export default function BlogPost({ slug }: BlogPostProps) {
     return (
       <div className="min-h-screen pt-40 pb-24 text-center">
         <h2 className="text-3xl font-display font-medium text-white mb-4">404 // ARTICLE_NOT_FOUND</h2>
-        <button 
+        <button
           onClick={() => navigate('/blog')}
           className="text-sm text-studio-accent underline"
         >
@@ -88,7 +88,7 @@ export default function BlogPost({ slug }: BlogPostProps) {
   return (
     <article className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       {/* Back Button */}
-      <button 
+      <button
         onClick={() => navigate('/blog')}
         className="inline-flex items-center gap-2 text-sm text-studio-text-secondary hover:text-white mb-8 transition-colors"
       >
@@ -128,9 +128,9 @@ export default function BlogPost({ slug }: BlogPostProps) {
       {/* Cover Image */}
       {blog.coverImage && (
         <div className="mb-12 rounded-3xl overflow-hidden aspect-[16/9] border border-white/5 shadow-2xl">
-          <img 
-            src={blog.coverImage} 
-            alt={blog.title} 
+          <img
+            src={blog.coverImage}
+            alt={blog.title}
             className="w-full h-full object-cover"
           />
         </div>
@@ -142,7 +142,7 @@ export default function BlogPost({ slug }: BlogPostProps) {
       </div>
 
       {/* Rich Text Rendered Content */}
-      <div 
+      <div
         className="prose prose-invert max-w-none text-studio-text-primary/90 font-sans leading-relaxed text-base sm:text-lg mb-16 ql-editor-display"
         dangerouslySetInnerHTML={{ __html: blog.content }}
       />

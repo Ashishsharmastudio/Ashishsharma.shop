@@ -8,35 +8,35 @@ Ashish Sharma is a software developer focused on building modern web application
 
 ## Website
 
-- https://ashishsharma.shop/
+- https://www.ashishsharma.shop/
 
 ## About Me
 
-- https://ashishsharma.shop/about
+- https://www.ashishsharma.shop/about
 
 ## Services
 
-- https://ashishsharma.shop/services
+- https://www.ashishsharma.shop/services
 
 ## Work
 
-- https://ashishsharma.shop/work
+- https://www.ashishsharma.shop/work
 
 ## Blog
 
-- https://ashishsharma.shop/blog
+- https://www.ashishsharma.shop/blog
 
 ## Contact
 
-- https://ashishsharma.shop/contact
+- https://www.ashishsharma.shop/contact
 
 ## Featured Articles
 
-- https://ashishsharma.shop/blog/production-rag-architecture-zero-hallucinations
-- https://ashishsharma.shop/blog/production-real-time-voice-ai-agent-architecture
-- https://ashishsharma.shop/blog/enterprise-mcp-server-architecture-production-security
-- https://ashishsharma.shop/blog/enterprise-ai-agent-architecture-deterministic-state-machines
-- https://ashishsharma.shop/blog/why-consultancies-outgrow-wordpress-decoupled-platforms
+- https://www.ashishsharma.shop/blog/production-rag-architecture-zero-hallucinations
+- https://www.ashishsharma.shop/blog/production-real-time-voice-ai-agent-architecture
+- https://www.ashishsharma.shop/blog/enterprise-mcp-server-architecture-production-security
+- https://www.ashishsharma.shop/blog/enterprise-ai-agent-architecture-deterministic-state-machines
+- https://www.ashishsharma.shop/blog/why-consultancies-outgrow-wordpress-decoupled-platforms
 
 ## Content
 
@@ -60,8 +60,8 @@ For understanding the website, prioritize:
 
 ## Sitemap
 
-- https://ashishsharma.shop/sitemap.xml
+- https://www.ashishsharma.shop/sitemap.xml
 
 ## Robots
 
-- https://ashishsharma.shop/robots.txt
+- https://www.ashishsharma.shop/robots.txt
