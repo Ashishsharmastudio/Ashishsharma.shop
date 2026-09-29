@@ -7,11 +7,17 @@ interface ViteAssets {
   js: string[];
 }
 
+// Current production bundle hashes fallback
+const DEFAULT_ASSETS: ViteAssets = {
+  css: ['/assets/index-jD_k_eQC.css'],
+  js: ['/assets/index-CNtZsm1y.js'],
+};
+
 let cachedAssets: ViteAssets | null = null;
 
 /**
  * Resolves compiled Vite CSS and JS bundle script tags by reading dist/index.html.
- * Caches the result in-memory for subsequent serverless invocations.
+ * Falls back to known default production bundle assets if dist/index.html is not traced.
  */
 export function getViteAssets(): ViteAssets {
   if (cachedAssets) {
@@ -30,17 +36,20 @@ export function getViteAssets(): ViteAssets {
         ...html.matchAll(/<link[^>]+href=["'](\/assets\/[^"']+\.css)["'][^>]*>/g),
       ];
 
-      cachedAssets = {
-        js: jsMatches.map((m) => m[1]),
-        css: cssMatches.map((m) => m[1]),
-      };
-      return cachedAssets;
+      if (jsMatches.length > 0 || cssMatches.length > 0) {
+        cachedAssets = {
+          js: jsMatches.map((m) => m[1]),
+          css: cssMatches.map((m) => m[1]),
+        };
+        return cachedAssets;
+      }
     }
   } catch (err) {
-    console.warn('Could not read dist/index.html for asset hashes:', err);
+    // Graceful fallback: never crash serverless function on disk read
   }
 
-  return { js: [], css: [] };
+  cachedAssets = DEFAULT_ASSETS;
+  return cachedAssets;
 }
 
 export interface HtmlPageOptions {

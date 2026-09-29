@@ -83,5 +83,14 @@ export async function handleRenderBlog(
  * Dedicated Vercel Serverless Function entrypoint for rendering /blog/:slug.
  */
 export default async function handler(req: Request, res: Response) {
-  return handleRenderBlog(req, res);
+  try {
+    return await handleRenderBlog(req, res);
+  } catch (fatalError: unknown) {
+    console.error('Fatal SSR Execution Error:', fatalError);
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.status(500).send(render500Html());
+    }
+  }
 }
