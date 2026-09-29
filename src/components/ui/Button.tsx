@@ -1,9 +1,12 @@
 import { ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Link } from '../../lib/router';
 
 interface ButtonProps {
   children: ReactNode;
+
+  href?: string;
 
   variant?: 'primary' | 'secondary' | 'outline' | 'text';
 
@@ -14,7 +17,7 @@ interface ButtonProps {
   className?: string;
 
   onClick?: (
-    event: React.MouseEvent<HTMLButtonElement>
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => void;
 
   type?: 'button' | 'submit' | 'reset';
@@ -36,6 +39,7 @@ interface ButtonProps {
 
 export default function Button({
   children,
+  href,
   variant = 'primary',
   showArrow = false,
   className = '',
@@ -67,6 +71,40 @@ export default function Button({
       'bg-transparent text-studio-text-primary hover:text-studio-accent px-0 py-2 border-b border-transparent hover:border-studio-accent rounded-none',
   };
 
+  const innerContent = (
+    <span className="relative z-10 flex items-center gap-1.5">
+      {children}
+
+      {showArrow && (
+        <motion.span
+          className="inline-block"
+          initial={{ x: 0, y: 0 }}
+          whileHover={{ x: 2, y: -2 }}
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 10,
+          }}
+        >
+          <ArrowUpRight className="w-4 h-4" />
+        </motion.span>
+      )}
+    </span>
+  );
+
+  // If href is specified, render a crawlable anchor tag via Link
+  if (href) {
+    return (
+      <Link
+        id={id}
+        href={href}
+        className={`${baseStyles} ${variants[variant]} ${className}`}
+      >
+        {innerContent}
+      </Link>
+    );
+  }
+
   return (
     <motion.button
       id={id}
@@ -82,24 +120,7 @@ export default function Button({
       whileTap={{ scale: 0.98 }}
       className={`${baseStyles} ${variants[variant]} ${className}`}
     >
-      <span className="relative z-10 flex items-center gap-1.5">
-        {children}
-
-        {showArrow && (
-          <motion.span
-            className="inline-block"
-            initial={{ x: 0, y: 0 }}
-            whileHover={{ x: 2, y: -2 }}
-            transition={{
-              type: 'spring',
-              stiffness: 400,
-              damping: 10,
-            }}
-          >
-            <ArrowUpRight className="w-4 h-4" />
-          </motion.span>
-        )}
-      </span>
+      {innerContent}
     </motion.button>
   );
 }

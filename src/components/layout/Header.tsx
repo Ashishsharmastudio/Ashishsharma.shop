@@ -82,7 +82,7 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-4">
             <Button
               variant="outline"
-              onClick={() => navigate('/contact')}
+              href="/contact"
               showArrow
               className="text-xs py-2 px-5 hover:bg-studio-text-primary hover:text-studio-bg"
             >
@@ -94,7 +94,7 @@ export default function Header() {
           <div className="flex md:hidden items-center gap-3">
             <Button
               variant="primary"
-              onClick={() => navigate('/contact')}
+              href="/contact"
               className="text-xs py-2 px-4.5 rounded-full"
             >
               Start
@@ -158,7 +158,7 @@ export default function Header() {
               </div>
               <Button
                 variant="primary"
-                onClick={() => navigate('/contact')}
+                href="/contact"
                 showArrow
                 className="w-full justify-center py-4 text-base"
               >

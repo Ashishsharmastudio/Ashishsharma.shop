@@ -16,6 +16,7 @@ export interface IBlog extends Document {
   views: number;
   totalTimeSpent: number;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 const BlogSchema =
@@ -77,6 +78,11 @@ const BlogSchema =
       },
 
       createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+
+      updatedAt: {
         type: Date,
         default: Date.now,
       },

@@ -1,61 +1,40 @@
 import { motion } from 'motion/react';
 
-export default function TechStack() {
-  const row1 = [
-    'React', 'Next.js', 'TypeScript', 'Node.js', 'Tailwind CSS', 'MongoDB', 
-    'PostgreSQL', 'Supabase', 'Vercel'
-  ];
-  
-  const row2 = [
-    'AWS', 'OpenAI', 'Anthropic', 'Stripe', 'Sanity', 'Figma', 
-    'Make', 'Zapier', 'Python'
+export default function Stats() {
+  const statsList = [
+    { value: '15+', label: 'Years of Experience' },
+    { value: '40+', label: 'Projects Delivered' },
+    { value: '20+', label: 'Clients & Teams' },
+    { value: '100%', label: 'Production Focused' },
   ];
 
   return (
-    <section className="py-16 bg-[#090909] border-b border-studio-border/50 overflow-hidden relative">
-      {/* Edge Fades */}
-      <div className="absolute top-0 bottom-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#090909] to-transparent z-10 pointer-events-none" />
-      <div className="absolute top-0 bottom-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#090909] to-transparent z-10 pointer-events-none" />
+    <section className="py-20 md:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-studio-border/50">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-8">
+        {statsList.map((stat, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{
+              duration: 0.6,
+              delay: idx * 0.1,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="flex flex-col border-l border-studio-border pl-6 relative group"
+          >
+            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-studio-accent scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-studio-accent mb-2 block">
-          // THE INTEGRATIONS HUB
-        </span>
-        <h3 className="text-xl md:text-2xl font-display font-medium text-white">
-          Our core engineering & automation ecosystem.
-        </h3>
-      </div>
+            <span className="font-display font-bold text-5xl sm:text-6xl md:text-7xl text-white group-hover:text-studio-accent transition-colors duration-300 tracking-tight leading-none mb-3 select-none">
+              {stat.value}
+            </span>
 
-      <div className="flex flex-col gap-5 hover-pause">
-        {/* Left marquee */}
-        <div className="w-full flex overflow-hidden">
-          <div className="animate-marquee flex whitespace-nowrap gap-6 items-center pr-6">
-            {Array(8).fill(row1).flat().map((tech, idx) => (
-              <div
-                key={idx}
-                className="px-5 py-2.5 rounded-md border border-studio-border bg-studio-card/80 font-mono text-sm text-studio-text-primary flex items-center gap-2 select-none"
-              >
-                <span className="w-1.5 h-1.5 bg-studio-accent" />
-                {tech}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right marquee */}
-        <div className="w-full flex overflow-hidden">
-          <div className="animate-marquee-reverse flex whitespace-nowrap gap-6 items-center pr-6">
-            {Array(8).fill(row2).flat().map((tech, idx) => (
-              <div
-                key={idx}
-                className="px-5 py-2.5 rounded-md border border-studio-border bg-studio-card/80 font-mono text-sm text-studio-text-primary flex items-center gap-2 select-none"
-              >
-                <span className="w-1.5 h-1.5 bg-indigo-500" />
-                {tech}
-              </div>
-            ))}
-          </div>
-        </div>
+            <span className="font-sans text-xs uppercase tracking-widest text-studio-text-secondary">
+              {stat.label}
+            </span>
+          </motion.div>
+        ))}
       </div>
     </section>
   );

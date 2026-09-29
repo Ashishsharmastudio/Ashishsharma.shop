@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from '../lib/router';
+import { useRouter, Link } from '../lib/router';
 import SectionHeader from '../components/ui/SectionHeader';
 import { motion, AnimatePresence } from 'motion/react';
 import { getBlogs, Blog } from '../lib/blogStore';
@@ -83,10 +83,13 @@ export default function BlogPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               key={blog._id}
-              className="group cursor-pointer"
-              onClick={() => navigate(`/blog/${blog.slug}`)}
+              className="h-full"
             >
-              <GlassCard className="h-full overflow-hidden flex flex-col hover:border-white/10 hover:bg-white/[0.04] transition-all">
+              <Link
+                href={`/blog/${blog.slug}`}
+                className="group block h-full focus:outline-none"
+              >
+                <GlassCard className="h-full overflow-hidden flex flex-col hover:border-white/10 hover:bg-white/[0.04] transition-all">
                 {blog.coverImage && (
                   <div className="w-full aspect-[16/10] overflow-hidden border-b border-white/5 relative">
                     <img 
@@ -130,7 +133,8 @@ export default function BlogPage() {
                   </div>
                 </div>
               </GlassCard>
-            </motion.div>
+            </Link>
+          </motion.div>
           ))}
         </div>
       )}

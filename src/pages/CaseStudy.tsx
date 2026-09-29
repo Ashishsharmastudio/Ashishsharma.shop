@@ -1,4 +1,4 @@
-import { useRouter } from '../lib/router';
+import { useRouter, Link } from '../lib/router';
 import { projects } from '../data/projects';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -21,7 +21,7 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
         <div className="max-w-md mx-auto px-4">
           <span className="font-mono text-xs text-studio-accent">// 404_PROJECT_NOT_FOUND</span>
           <h2 className="text-3xl font-display font-medium text-white mt-4 mb-6">Case study was archived or moved.</h2>
-          <Button variant="primary" onClick={() => navigate('/work')} showArrow>
+          <Button variant="primary" href="/work" showArrow>
             Go back to Work
           </Button>
         </div>
@@ -36,13 +36,13 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
     <main className="pt-32 pb-24">
       {/* Editorial Hero Area */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <button
-          onClick={() => navigate('/work')}
+        <Link
+          href="/work"
           className="inline-flex items-center gap-2 text-xs font-mono text-studio-text-secondary hover:text-white transition-colors duration-300 mb-8 focus:outline-none cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           BACK TO PORTFOLIO
-        </button>
+        </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
           <div className="lg:col-span-8">
@@ -192,7 +192,7 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
           </div>
           <Button
             variant="primary"
-            onClick={() => navigate(`/work/${nextProject.slug}`)}
+            href={`/work/${nextProject.slug}`}
             showArrow
             className="px-8 py-4 text-sm"
           >

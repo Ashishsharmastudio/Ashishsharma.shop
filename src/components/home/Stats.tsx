@@ -4,8 +4,8 @@ export default function Stats() {
   const statsList = [
     { value: '15+', label: 'Years of Experience' },
     { value: '40+', label: 'Projects Delivered' },
-    { value: '20+', label: 'Happy Clients' },
-    { value: '100', label: 'Performance Focused' },
+    { value: '20+', label: 'Clients & Teams' },
+    { value: '100%', label: 'Production Focused' },
   ];
 
   return (
@@ -17,15 +17,19 @@ export default function Stats() {
             initial={{ opacity: 0, y: 25 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.6, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              duration: 0.6,
+              delay: idx * 0.1,
+              ease: [0.16, 1, 0.3, 1],
+            }}
             className="flex flex-col border-l border-studio-border pl-6 relative group"
           >
-            {/* Hover visual accent indicator line */}
             <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-studio-accent scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top" />
-            
+
             <span className="font-display font-bold text-5xl sm:text-6xl md:text-7xl text-white group-hover:text-studio-accent transition-colors duration-300 tracking-tight leading-none mb-3 select-none">
               {stat.value}
             </span>
+
             <span className="font-sans text-xs uppercase tracking-widest text-studio-text-secondary">
               {stat.label}
             </span>

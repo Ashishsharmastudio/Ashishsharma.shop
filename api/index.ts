@@ -252,6 +252,8 @@ function createMcpServer(): McpServer {
                 : [],
             published:
               Boolean(published),
+            createdAt: new Date(),
+            updatedAt: new Date(),
           });
 
         await post.save();
@@ -635,6 +637,8 @@ app.post(
             'boolean'
               ? published
               : false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
 
       const savedBlog =
@@ -678,6 +682,8 @@ app.put(
       const {
         id,
       } = req.params;
+
+      req.body.updatedAt = new Date();
 
       const updatedBlog =
         await Blog.findByIdAndUpdate(

@@ -10,6 +10,7 @@ export default function Hero() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -26,8 +27,11 @@ export default function Hero() {
       baseOpacity: number;
     }[] = [];
 
-    // Initialize dust nodes
-    const particleCount = Math.min(100, Math.floor((width * height) / 15000));
+    const particleCount = Math.min(
+      100,
+      Math.floor((width * height) / 15000)
+    );
+
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * width,
@@ -54,7 +58,6 @@ export default function Hero() {
     };
 
     const handleResize = () => {
-      if (!canvas) return;
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
     };
@@ -66,16 +69,18 @@ export default function Hero() {
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw subtle ambient grid
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
       ctx.lineWidth = 1;
+
       const gridSize = 40;
+
       for (let x = 0; x < width; x += gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, height);
         ctx.stroke();
       }
+
       for (let y = 0; y < height; y += gridSize) {
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -83,27 +88,29 @@ export default function Hero() {
         ctx.stroke();
       }
 
-      // Draw dust nodes
       particles.forEach((p) => {
         p.x += p.speedX;
         p.y += p.speedY;
 
-        // Wrap boundaries
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        // Mouse attraction/repulsion vector
         let opacity = p.baseOpacity;
+
         if (mouseX > 0 && mouseY > 0) {
           const dx = mouseX - p.x;
           const dy = mouseY - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
+
           if (dist < 180) {
             opacity = (1 - dist / 180) * 0.85 + p.baseOpacity;
-            // Draw thin connection lines between mouse and close particles
-            ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - dist / 180) * 0.12})`;
+
+            ctx.strokeStyle = `rgba(59, 130, 246, ${
+              (1 - dist / 180) * 0.12
+            })`;
+
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p.x + dx * 0.1, p.y + dy * 0.1);
@@ -117,11 +124,19 @@ export default function Hero() {
         ctx.fill();
       });
 
-      // Mouse reactive radial glow
       if (mouseX > 0 && mouseY > 0) {
-        const glowGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 150);
+        const glowGrad = ctx.createRadialGradient(
+          mouseX,
+          mouseY,
+          0,
+          mouseX,
+          mouseY,
+          150
+        );
+
         glowGrad.addColorStop(0, 'rgba(59, 130, 246, 0.08)');
         glowGrad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
         ctx.fillStyle = glowGrad;
         ctx.beginPath();
         ctx.arc(mouseX, mouseY, 150, 0, Math.PI * 2);
@@ -143,16 +158,14 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen w-full flex items-center justify-center pt-32 pb-16 overflow-hidden">
-      {/* Dynamic Background Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-auto z-0"
+        aria-hidden="true"
       />
 
-      {/* Grid overlay */}
       <div className="absolute inset-0 noise-bg opacity-[0.03] pointer-events-none z-0" />
 
-      {/* Decorative lighting flares */}
       <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] rounded-full bg-studio-accent/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-[150px] pointer-events-none" />
 
@@ -166,19 +179,23 @@ export default function Hero() {
           >
             <span className="w-2 h-2 rounded-full bg-studio-accent animate-pulse" />
             <span className="font-mono text-[11px] uppercase tracking-wider text-studio-text-secondary">
-              Ashish Sharma // AI Systems Engineer &amp; Platform Architect
+              Ashish Sharma // AI Systems Engineer & Technical Architect
             </span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.1,
+            }}
             className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-medium tracking-tight text-white leading-[1.05] mb-8"
           >
-            Engineering intelligent AI systems that{' '}
+            Turn complex business workflows into{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-studio-accent via-blue-400 to-indigo-400">
-              survive production scale
+              intelligent systems
             </span>
             .
           </motion.h1>
@@ -186,46 +203,85 @@ export default function Hero() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
-            className="text-lg sm:text-xl md:text-2xl text-studio-text-secondary font-sans leading-relaxed max-w-3xl mb-10"
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.25,
+            }}
+            className="text-lg sm:text-xl md:text-2xl text-studio-text-secondary font-sans leading-relaxed max-w-3xl mb-8"
           >
-            Ashish Sharma designs and deploys zero-hallucination RAG pipelines, sub-500ms WebRTC voice agents, and decoupled Next.js platforms for enterprise teams and domain consultancies worldwide.
+            I design and deploy production software, AI automation, and
+            decision-support systems that connect people, data, and processes —
+            with humans staying in control where judgment matters.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.35,
+            }}
+            className="mb-10 max-w-3xl"
+          >
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[10px] sm:text-xs uppercase tracking-[0.16em] text-studio-text-secondary">
+              <span className="text-studio-accent">01</span>
+              <span>Workflow</span>
+              <span className="text-studio-border">→</span>
+              <span>System</span>
+              <span className="text-studio-border">→</span>
+              <span>AI / Automation</span>
+              <span className="text-studio-border">→</span>
+              <span>Human Review</span>
+              <span className="text-studio-border">→</span>
+              <span>Production</span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.45,
+            }}
             className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4"
           >
             <Button
               variant="primary"
-              onClick={() => navigate('/contact')}
+              href="/contact"
               showArrow
               className="w-full sm:w-auto px-8 py-4 text-base"
             >
-              Start a project
+              Describe your workflow
             </Button>
+
             <Button
               variant="secondary"
-              onClick={() => navigate('/work')}
+              href="/work"
               className="w-full sm:w-auto px-8 py-4 text-base"
             >
-              View selected work
+              See production work
             </Button>
           </motion.div>
         </div>
       </div>
 
-      {/* Bottom sliding scroll signal */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
         <span className="font-mono text-[9px] uppercase tracking-widest text-studio-text-secondary">
-          Scroll to explore
+          Explore the system
         </span>
+
         <div className="w-[1px] h-12 bg-studio-border relative overflow-hidden">
           <motion.div
             animate={{ y: ['-100%', '100%'] }}
-            transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.8,
+              ease: 'easeInOut',
+            }}
             className="absolute top-0 left-0 w-full h-1/3 bg-studio-accent"
           />
         </div>

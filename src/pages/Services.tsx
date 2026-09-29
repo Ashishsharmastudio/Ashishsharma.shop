@@ -103,7 +103,7 @@ export default function Services() {
         <h4 className="text-xl md:text-2xl font-display text-white mb-6">Ready to see your product come together?</h4>
         <Button
           variant="primary"
-          onClick={() => navigate('/contact')}
+          href="/contact"
           showArrow
           className="px-8"
         >

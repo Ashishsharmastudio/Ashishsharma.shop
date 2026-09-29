@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from '../lib/router';
+import { useRouter, Link } from '../lib/router';
 import { getBlogById, Blog } from '../lib/blogStore';
 import { Calendar, User, ArrowLeft, ArrowUpRight } from 'lucide-react';
 
@@ -9,18 +9,35 @@ interface BlogPostProps {
 
 export default function BlogPost({ slug }: BlogPostProps) {
   const { navigate } = useRouter();
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  // Defensive client initial state takeover:
+  // If the server rendered this article, read initial data immediately
+  // to prevent loading spinners and duplicate network requests.
+  const initialBlog =
+    typeof window !== 'undefined'
+      ? (window as Window & { __INITIAL_BLOG__?: Blog }).__INITIAL_BLOG__
+      : undefined;
+
+  const hydratedInitialBlog = initialBlog?.slug === slug ? initialBlog : null;
+
+  const [blog, setBlog] = useState<Blog | null>(hydratedInitialBlog);
+  const [loading, setLoading] = useState(!hydratedInitialBlog);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    // If the post is already loaded from server pre-rendering and matches the slug, skip re-fetching
+    if (blog && blog.slug === slug) {
+      setLoading(false);
+      return;
+    }
+
     const fetchBlog = async () => {
       try {
         setLoading(true);
         const data = await getBlogById(slug);
         setBlog(data);
       } catch (err: any) {
-        setError(err.message || "Failed to load the article");
+        setError(err.message || 'Failed to load the article');
       } finally {
         setLoading(false);
       }
@@ -75,12 +92,12 @@ export default function BlogPost({ slug }: BlogPostProps) {
     return (
       <div className="min-h-screen pt-40 pb-24 text-center">
         <h2 className="text-3xl font-display font-medium text-white mb-4">404 // ARTICLE_NOT_FOUND</h2>
-        <button
-          onClick={() => navigate('/blog')}
+        <Link
+          href="/blog"
           className="text-sm text-studio-accent underline"
         >
           Back to Blog
-        </button>
+        </Link>
       </div>
     );
   }
@@ -88,12 +105,12 @@ export default function BlogPost({ slug }: BlogPostProps) {
   return (
     <article className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       {/* Back Button */}
-      <button
-        onClick={() => navigate('/blog')}
+      <Link
+        href="/blog"
         className="inline-flex items-center gap-2 text-sm text-studio-text-secondary hover:text-white mb-8 transition-colors"
       >
         <ArrowLeft size={16} /> Back to Insights
-      </button>
+      </Link>
 
       {/* Header Info */}
       <header className="mb-12 border-b border-studio-border/30 pb-8">
