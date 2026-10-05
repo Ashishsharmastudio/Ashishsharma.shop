@@ -1,7 +1,8 @@
 import { useRouter, Link } from '../lib/router';
 import { projects } from '../data/projects';
-import { ArrowLeft, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CheckCircle2, Github, ExternalLink } from 'lucide-react';
 import Button from '../components/ui/Button';
+import { trackLiveSandboxLaunch, trackGitHubInspection } from '../lib/analytics';
 
 interface CaseStudyProps {
   slug: string;
@@ -30,8 +31,15 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
     );
   }
 
-  // Get next project for CTA
   const nextProject = projects[(projectIndex + 1) % projects.length];
+
+  const handleLaunchLive = (url: string) => {
+    trackLiveSandboxLaunch(project.title, url);
+  };
+
+  const handleViewRepo = (url: string) => {
+    trackGitHubInspection(project.title, url);
+  };
 
   return (
     <main className="pt-32 pb-24">
@@ -54,34 +62,34 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
               {project.title}
             </h1>
 
-            {/* Live System Action Triggers */}
-            {project.slug === 'audittrust-hitl-lease-auditing-platform' && (
-              <div className="mt-4">
+            {/* Dynamic Live System & GitHub Action Buttons */}
+            <div className="flex flex-wrap gap-3 mt-4">
+              {project.liveUrl && (
                 <a
-                  href="https://audit-trust-hitl-git-main-my-team-7bacae96.vercel.app/"
+                  href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => handleLaunchLive(project.liveUrl!)}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-studio-accent text-white text-xs font-mono font-medium hover:bg-studio-accent/90 transition-all shadow-lg shadow-studio-accent/20"
                 >
-                  <span>Launch Live AuditTrust Sandbox</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span>Launch Live System</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
-              </div>
-            )}
-
-            {project.slug === 'reset-pods-operational-reserve-booking-engine' && (
-              <div className="mt-4">
+              )}
+              {project.githubUrl && (
                 <a
-                  href="https://rest-pods-new-al67.vercel.app/benefits"
+                  href={project.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-studio-accent text-white text-xs font-mono font-medium hover:bg-studio-accent/90 transition-all shadow-lg shadow-studio-accent/20"
+                  onClick={() => handleViewRepo(project.githubUrl!)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-mono font-medium hover:bg-white/20 transition-all"
                 >
-                  <span>View Live Reset Pods Platform</span>
+                  <Github className="w-3.5 h-3.5" />
+                  <span>View Repository</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="lg:col-span-4 lg:text-right font-mono text-xs text-studio-text-secondary">
@@ -110,27 +118,30 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
             </h2>
             <p className="text-sm text-white/70 mb-6">{project.subtitle}</p>
 
-            {/* In-Canvas Live Demo Quick Links */}
-            {project.slug === 'audittrust-hitl-lease-auditing-platform' && (
-              <a
-                href="https://audit-trust-hitl-git-main-my-team-7bacae96.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-xs font-mono hover:bg-white/20 transition-all"
-              >
-                <span>Interactive Workbench Preview ↗</span>
-              </a>
-            )}
-            {project.slug === 'reset-pods-operational-reserve-booking-engine' && (
-              <a
-                href="https://rest-pods-new-al67.vercel.app/benefits"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-xs font-mono hover:bg-white/20 transition-all"
-              >
-                <span>Live Reservation Engine ↗</span>
-              </a>
-            )}
+            <div className="flex justify-center gap-3">
+              {project.liveUrl && (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleLaunchLive(project.liveUrl!)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-studio-accent text-white text-xs font-mono hover:bg-studio-accent/90 transition-all"
+                >
+                  <span>Interactive System Preview ↗</span>
+                </a>
+              )}
+              {project.githubUrl && (
+                <a
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleViewRepo(project.githubUrl!)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-xs font-mono hover:bg-white/20 transition-all"
+                >
+                  <span>Source Code ↗</span>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -165,9 +176,8 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
         </div>
       </section>
 
-      {/* Main Narrative Layout Grid */}
+      {/* Narrative Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
-        {/* Left Side: Challenge & Details */}
         <div className="lg:col-span-8 space-y-12">
           <div>
             <h3 className="text-xs font-mono uppercase tracking-widest text-studio-accent mb-4">
@@ -203,9 +213,7 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
           </div>
         </div>
 
-        {/* Right Side: Key Metrics & Technical Stack */}
         <div className="lg:col-span-4 space-y-10">
-          {/* Tech Stack Box */}
           <div className="bg-studio-card border border-studio-border rounded-xl p-6">
             <h4 className="text-xs font-mono uppercase tracking-wider text-studio-text-primary mb-4">
               // Technology Stack
@@ -222,7 +230,6 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
             </div>
           </div>
 
-          {/* Core Metrics List */}
           <div className="space-y-6">
             <h4 className="text-xs font-mono uppercase tracking-wider text-studio-text-primary">
               // Key Outcomes
@@ -243,7 +250,7 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
         </div>
       </section>
 
-      {/* Measurable Results Section */}
+      {/* Measurable Results */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24 bg-studio-card border border-studio-border p-8 md:p-12 rounded-2xl">
         <h3 className="text-xs font-mono uppercase tracking-widest text-studio-accent mb-6">
           // Measurable Results
@@ -260,7 +267,7 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
         </div>
       </section>
 
-      {/* Client Testimonial Card */}
+      {/* Client Testimonial */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="border-l-2 border-studio-accent pl-6 md:pl-10 max-w-4xl py-2">
           <p className="text-xl md:text-2xl font-display italic text-white/90 leading-relaxed mb-6">
@@ -275,7 +282,7 @@ export default function CaseStudy({ slug }: CaseStudyProps) {
         </div>
       </section>
 
-      {/* Next Case Study Dynamic Trigger CTA */}
+      {/* Up Next CTA */}
       <section className="border-t border-studio-border pt-16 mt-16 bg-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>

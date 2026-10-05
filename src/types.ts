@@ -23,6 +23,8 @@ export interface Project {
     author: string;
     role: string;
   };
+  liveUrl?: string;
+  githubUrl?: string;
 }
 
 export interface Service {

@@ -2,38 +2,25 @@ import { ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from '../../lib/router';
+import { trackCalBookingClick } from '../../lib/analytics';
 
 interface ButtonProps {
   children: ReactNode;
-
   href?: string;
-
   variant?: 'primary' | 'secondary' | 'outline' | 'text';
-
   showArrow?: boolean;
-
   id?: string;
-
   className?: string;
-
   onClick?: (
     event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => void;
-
   type?: 'button' | 'submit' | 'reset';
-
   disabled?: boolean;
-
   name?: string;
-
   value?: string | number | readonly string[];
-
   form?: string;
-
   autoFocus?: boolean;
-
   title?: string;
-
   ariaLabel?: string;
 }
 
@@ -60,21 +47,27 @@ export default function Button({
   const variants = {
     primary:
       'bg-studio-text-primary text-studio-bg hover:bg-studio-accent hover:text-white px-6 py-3.5 rounded-full border border-transparent shadow-lg shadow-black/10',
-
     secondary:
       'bg-studio-card text-studio-text-primary hover:bg-studio-text-primary hover:text-studio-bg px-6 py-3.5 rounded-full border border-studio-border',
-
     outline:
       'bg-transparent text-studio-text-primary border border-studio-border hover:border-studio-text-primary px-6 py-3.5 rounded-full',
-
     text:
       'bg-transparent text-studio-text-primary hover:text-studio-accent px-0 py-2 border-b border-transparent hover:border-studio-accent rounded-none',
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    // If clicking a Cal.com booking link, emit conversion event
+    if (href && href.includes('cal.com')) {
+      trackCalBookingClick(href);
+    }
+    if (onClick) {
+      onClick(e);
+    }
   };
 
   const innerContent = (
     <span className="relative z-10 flex items-center gap-1.5">
       {children}
-
       {showArrow && (
         <motion.span
           className="inline-block"
@@ -92,12 +85,28 @@ export default function Button({
     </span>
   );
 
-  // If href is specified, render a crawlable anchor tag via Link
   if (href) {
+    // Outbound link check (e.g. cal.com)
+    if (href.startsWith('http')) {
+      return (
+        <a
+          id={id}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleClick}
+          className={`${baseStyles} ${variants[variant]} ${className}`}
+        >
+          {innerContent}
+        </a>
+      );
+    }
+
     return (
       <Link
         id={id}
         href={href}
+        onClick={handleClick}
         className={`${baseStyles} ${variants[variant]} ${className}`}
       >
         {innerContent}
@@ -110,7 +119,7 @@ export default function Button({
       id={id}
       type={type}
       disabled={disabled}
-      onClick={onClick}
+      onClick={handleClick}
       name={name}
       value={value}
       form={form}

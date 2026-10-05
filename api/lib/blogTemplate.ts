@@ -7,7 +7,6 @@ interface ViteAssets {
   js: string[];
 }
 
-// Current production bundle hashes fallback
 const DEFAULT_ASSETS: ViteAssets = {
   css: ['/assets/index-jD_k_eQC.css'],
   js: ['/assets/index-CNtZsm1y.js'],
@@ -15,10 +14,6 @@ const DEFAULT_ASSETS: ViteAssets = {
 
 let cachedAssets: ViteAssets | null = null;
 
-/**
- * Resolves compiled Vite CSS and JS bundle script tags by reading dist/index.html.
- * Falls back to known default production bundle assets if dist/index.html is not traced.
- */
 export function getViteAssets(): ViteAssets {
   if (cachedAssets) {
     return cachedAssets;
@@ -45,7 +40,7 @@ export function getViteAssets(): ViteAssets {
       }
     }
   } catch (err) {
-    // Graceful fallback: never crash serverless function on disk read
+    // Graceful fallback to default asset hashes
   }
 
   cachedAssets = DEFAULT_ASSETS;
@@ -66,11 +61,6 @@ export interface HtmlPageOptions {
   is404?: boolean;
 }
 
-/**
- * Builds the standalone, complete HTML response document.
- * Includes Google Fonts, typography styles, meta tags, OpenGraph, JSON-LD,
- * pre-rendered article body inside #root, and client bundle links.
- */
 export function buildHtmlDocument(options: HtmlPageOptions): string {
   const assets = getViteAssets();
   const safeTitle = escapeHtml(options.title);
@@ -92,10 +82,22 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
   return `<!doctype html>
 <html lang="en">
 <head>
+  <!-- Google Tag Manager / GA4 Head Script -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-P43CFQ9J');
+  </script>
+  <!-- End Google Tag Manager -->
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Primary Meta Tags -->
   <title>${safeTitle}</title>
   <meta name="title" content="${safeTitle}" />
   <meta name="description" content="${safeDesc}" />
@@ -103,7 +105,6 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
   <meta name="robots" content="${options.is404 ? 'noindex, follow' : 'index, follow'}" />
   <link rel="canonical" href="${safeCanonical}" />
 
-  <!-- Open Graph / Facebook / LinkedIn -->
   <meta property="og:type" content="${options.is404 ? 'website' : 'article'}" />
   <meta property="og:site_name" content="Ashish Sharma Studio" />
   <meta property="og:locale" content="en_US" />
@@ -115,23 +116,19 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
   ${options.modifiedIso ? `<meta property="article:modified_time" content="${options.modifiedIso}" />` : ''}
   ${options.author ? `<meta property="article:author" content="${safeAuthor}" />` : ''}
 
-  <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${safeTitle}" />
   <meta name="twitter:description" content="${safeDesc}" />
   <meta name="twitter:image" content="${safeOgImage}" />
 
-  <!-- Typography & Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   ${options.jsonLd ? `<script type="application/ld+json">\n${options.jsonLd}\n  </script>` : ''}
 
-  <!-- Production Vite CSS Assets -->
   ${cssTags}
 
-  <!-- Core Standalone Studio Styles (Guarantees zero FOUC and full styling with JS disabled) -->
   <style>
     :root {
       --bg-studio: #08090A;
@@ -151,14 +148,9 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
     }
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
     .font-display { font-family: 'Outfit', sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    
-    /* Prose styling for article content */
     .prose-article {
       color: rgba(243, 244, 246, 0.9);
       font-size: 1.125rem;
@@ -177,16 +169,11 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
     .prose-article h1 { font-size: 2rem; }
     .prose-article h2 { font-size: 1.625rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 0.5rem; }
     .prose-article h3 { font-size: 1.375rem; }
-    .prose-article ul, .prose-article ol {
-      margin-left: 1.5rem;
-      margin-bottom: 1.75rem;
-    }
+    .prose-article ul, .prose-article ol { margin-left: 1.5rem; margin-bottom: 1.75rem; }
     .prose-article li { margin-bottom: 0.5rem; }
     .prose-article blockquote {
       border-left: 3px solid var(--accent-studio);
       padding-left: 1.25rem;
-      margin-left: 0;
-      margin-right: 0;
       font-style: italic;
       color: #D1D5DB;
     }
@@ -206,11 +193,7 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
       overflow-x: auto;
       margin-bottom: 1.75rem;
     }
-    .prose-article pre code {
-      background: transparent;
-      padding: 0;
-      color: inherit;
-    }
+    .prose-article pre code { background: transparent; padding: 0; color: inherit; }
     .prose-article a {
       color: var(--accent-purple);
       text-decoration: underline;
@@ -226,18 +209,12 @@ export function buildHtmlDocument(options: HtmlPageOptions): string {
   </style>
 </head>
 <body>
-  <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P43CFQ9J"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
 
-  <!-- Standalone Server-Rendered Content Container -->
   <div id="root">${options.bodyContent}</div>
 
-  <!-- Hydration / Initial Client Takeover Payload -->
   ${options.initialBlogJson ? `<script>window.__INITIAL_BLOG__ = ${options.initialBlogJson};</script>` : ''}
-
-  <!-- Production Vite JS Bundles -->
   ${jsTags}
 </body>
 </html>`;

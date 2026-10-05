@@ -1,8 +1,9 @@
 import { useState, FormEvent } from 'react';
 import SectionHeader from '../components/ui/SectionHeader';
-import { Send, CheckCircle, Flame, ServerCrash } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Button from '../components/ui/Button';
+import { trackProposalSubmission } from '../lib/analytics';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -10,10 +11,10 @@ export default function Contact() {
     email: '',
     company: '',
     website: '',
-    projectType: 'AI Product',
+    projectType: 'Operational System',
     budget: '$10K–$25K',
     timeline: '1-3 months',
-    details: ''
+    details: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -21,11 +22,20 @@ export default function Contact() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const projectTypes = [
-    'Website', 'Web Application', 'AI Product', 'UX/UI Design', 'Automation', 'AI Agent', 'Other'
+    'Operational System',
+    'HITL Agentic AI',
+    'Document Ingestion Engine',
+    'Legacy TMS/ERP Connector',
+    'Voice AI Gateway',
+    'Other Enterprise Architecture',
   ];
 
   const budgets = [
-    'Under $5K', '$5K–$10K', '$10K–$25K', '$25K–$50K', '$50K+'
+    'Under $10K',
+    '$10K–$25K',
+    '$25K–$50K',
+    '$50K–$100K',
+    '$100K+',
   ];
 
   const validate = () => {
@@ -36,7 +46,7 @@ export default function Contact() {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       tempErrors.email = 'Invalid email address';
     }
-    if (!formData.details.trim()) tempErrors.details = 'Please describe your project';
+    if (!formData.details.trim()) tempErrors.details = 'Please describe your operational workflow';
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -47,9 +57,12 @@ export default function Contact() {
 
     setIsSubmitting(true);
 
-    // Simulate API connection with 1.5s delay
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      // Fire Key Conversion Event in GA4
+      trackProposalSubmission(formData.projectType, formData.budget, formData.name);
+
       setIsSuccess(true);
     } catch (err) {
       console.error('Submission failed', err);
@@ -60,46 +73,55 @@ export default function Contact() {
 
   return (
     <main className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Page Header */}
       <SectionHeader
-        eyebrow="Get In Touch"
-        title="Tell us what you're building."
-        description="Whether you have complete technical specifications or simply a bold idea, let us know. We respond to all qualified queries within one business day."
+        eyebrow="Direct Architecture Channel"
+        title="Tell us about your operational bottleneck."
+        description="Whether you are replacing an army of offshore virtual assistants, dealing with manual PDF extraction, or automating freight dispatch, let us know. We respond to qualified enterprise inquiries within one business day."
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mt-12">
-        {/* Left column: Diagnostic info and contacts */}
+        {/* Left Column: Direct Contacts */}
         <div className="lg:col-span-4 space-y-10">
           <div>
-            <h3 className="font-mono text-xs uppercase tracking-wider text-studio-accent mb-4">// Direct Contacts</h3>
+            <h3 className="font-mono text-xs uppercase tracking-wider text-studio-accent mb-4">
+              // Direct Engagement Channel
+            </h3>
             <div className="space-y-3 font-sans text-sm text-studio-text-secondary">
               <p>
                 Inquiries:{' '}
-                <a href="mailto:ashishsharmastudio@gmail.com" className="text-white hover:text-studio-accent transition-colors">
+                <a
+                  href="mailto:ashishsharmastudio@gmail.com"
+                  className="text-white hover:text-studio-accent transition-colors"
+                >
                   ashishsharmastudio@gmail.com
                 </a>
               </p>
-              <p>
-                Studio Hours: Mon — Fri, 9am — 6pm PST
-              </p>
-              <p>
-                Location: San Francisco, CA // Distributed Node
+              <p>Studio Hours: Mon — Fri, 9am — 6pm EST / IST</p>
+              <p>Direct Scheduling:{' '}
+                <a
+                  href="https://cal.com/ashish-sharma-2000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-studio-accent underline ml-1"
+                >
+                  cal.com/ashish-sharma-2000 ↗
+                </a>
               </p>
             </div>
           </div>
 
           <div className="bg-studio-card/45 border border-studio-border p-6 rounded-xl space-y-3 font-mono text-[10px] text-studio-text-secondary">
-            <div>// INTEGRATION ENDPOINTS</div>
+            <div>// OPERATIONAL INTEGRATION GATEWAYS</div>
             <div>STATUS: STANDBY</div>
-            <div>CONNECTORS: RESEND, FORMSPREE, CUSTOM CRM</div>
+            <div>CONNECTORS: FASTAPI, REDIS, POSTGRESQL, MCLEOD, SAP</div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              ENDPOINT SECURE SSL
+              ENDPOINT SECURE TLS 1.3
             </div>
           </div>
         </div>
 
-        {/* Right column: Form / Success viewports */}
+        {/* Right Column: Proposal Form */}
         <div className="lg:col-span-8">
           <AnimatePresence mode="wait">
             {!isSuccess ? (
@@ -112,10 +134,9 @@ export default function Contact() {
                 className="bg-studio-card/30 border border-studio-border p-6 md:p-10 rounded-2xl space-y-8"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Name field */}
                   <div className="flex flex-col gap-2">
                     <label htmlFor="name" className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                      Name *
+                      Full Name *
                     </label>
                     <input
                       id="name"
@@ -123,15 +144,14 @@ export default function Contact() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full bg-[#111] border border-studio-border focus:border-studio-accent rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors"
-                      placeholder="Jane Doe"
+                      placeholder="Marcus Vance"
                     />
                     {errors.name && <span className="text-red-400 font-mono text-[10px]">{errors.name}</span>}
                   </div>
 
-                  {/* Email field */}
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email" className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                      Email *
+                      Work Email *
                     </label>
                     <input
                       id="email"
@@ -139,15 +159,14 @@ export default function Contact() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full bg-[#111] border border-studio-border focus:border-studio-accent rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors"
-                      placeholder="jane@company.com"
+                      placeholder="marcus@freight3pl.com"
                     />
                     {errors.email && <span className="text-red-400 font-mono text-[10px]">{errors.email}</span>}
                   </div>
 
-                  {/* Company field */}
                   <div className="flex flex-col gap-2">
                     <label htmlFor="company" className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                      Company
+                      Company / Organization
                     </label>
                     <input
                       id="company"
@@ -155,14 +174,13 @@ export default function Contact() {
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       className="w-full bg-[#111] border border-studio-border focus:border-studio-accent rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors"
-                      placeholder="Enterprise Co"
+                      placeholder="Midwest Logistics Corp"
                     />
                   </div>
 
-                  {/* Website field */}
                   <div className="flex flex-col gap-2">
                     <label htmlFor="website" className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                      Website URL
+                      Current TMS / ERP System
                     </label>
                     <input
                       id="website"
@@ -170,15 +188,14 @@ export default function Contact() {
                       value={formData.website}
                       onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                       className="w-full bg-[#111] border border-studio-border focus:border-studio-accent rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors"
-                      placeholder="https://www.blossombasket.in"
+                      placeholder="McLeod / TMW / Salesforce / Custom DB"
                     />
                   </div>
                 </div>
 
-                {/* Project Type choice buttons */}
                 <div className="flex flex-col gap-3">
                   <span className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                    Project Type *
+                    Core Operational Challenge *
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {projectTypes.map((type) => (
@@ -198,10 +215,9 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Budget Range choice buttons */}
                 <div className="flex flex-col gap-3">
                   <span className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                    Estimated Budget *
+                    Target Implementation Budget *
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {budgets.map((bud) => (
@@ -221,10 +237,9 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Tell us details field */}
                 <div className="flex flex-col gap-2">
                   <label htmlFor="details" className="font-mono text-[10px] uppercase text-studio-text-secondary tracking-wider">
-                    Tell us about your project *
+                    Describe the Process Bottleneck *
                   </label>
                   <textarea
                     id="details"
@@ -232,12 +247,11 @@ export default function Contact() {
                     value={formData.details}
                     onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                     className="w-full bg-[#111] border border-studio-border focus:border-studio-accent rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-colors resize-none"
-                    placeholder="Describe your goals, requirements, constraints, and how we can help..."
+                    placeholder="Describe where work gets stuck: rate negotiation delays, manual document re-keying, human error rates, or brittle integration scripts..."
                   />
                   {errors.details && <span className="text-red-400 font-mono text-[10px]">{errors.details}</span>}
                 </div>
 
-                {/* Submit button */}
                 <Button
                   id="submit-proposal"
                   variant="primary"
@@ -245,7 +259,7 @@ export default function Contact() {
                   disabled={isSubmitting}
                   className="w-full justify-center py-4 text-base rounded-xl font-mono text-xs cursor-pointer"
                 >
-                  {isSubmitting ? 'TRANSMITTING ENCRYPTED...' : 'TRANSMIT PROPOSAL'}
+                  {isSubmitting ? 'TRANSMITTING WORKFLOW BRIEF...' : 'TRANSMIT WORKFLOW BRIEF'}
                 </Button>
               </motion.form>
             ) : (
@@ -254,22 +268,22 @@ export default function Contact() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-studio-card/50 border-2 border-studio-accent/30 p-8 md:p-12 rounded-2xl text-center space-y-6 shadow-2xl shadow-studio-accent/5 relative overflow-hidden"
+                className="bg-studio-card/50 border-2 border-studio-accent/30 p-8 md:p-12 rounded-2xl text-center space-y-6 shadow-2xl relative overflow-hidden"
               >
-                {/* Visual glow particle backdrop */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-studio-accent/15 blur-[50px] pointer-events-none" />
-
                 <CheckCircle className="w-16 h-16 text-studio-accent mx-auto" />
-                <h3 className="text-2xl md:text-3xl font-display font-medium text-white">Proposal Transmitted.</h3>
+                <h3 className="text-2xl md:text-3xl font-display font-medium text-white">
+                  Workflow Brief Received.
+                </h3>
                 <p className="text-sm md:text-base text-studio-text-secondary leading-relaxed max-w-lg mx-auto">
-                  Thank you, <span className="text-white font-medium">{formData.name}</span>. Your project brief has been successfully logged inside our secure operations queue. A senior builder will review the parameters and schedule your call.
+                  Thank you, <span className="text-white font-medium">{formData.name}</span>. Your operational requirements have been logged into our review queue. A systems architect will review the parameters and contact you to schedule an architecture session.
                 </p>
-                <div className="font-mono text-[10px] text-studio-text-secondary/60">
-                  REF_ID: // {Math.floor(Math.random() * 900000 + 100000)} // RECEIVED_UTC
-                </div>
-                <div className="pt-4">
-                  <Button variant="outline" onClick={() => setIsSuccess(false)}>
-                    Submit another inquiry
+                <div className="pt-4 flex justify-center gap-4">
+                  <Button
+                    variant="primary"
+                    href="https://cal.com/ashish-sharma-2000"
+                    showArrow
+                  >
+                    Schedule Direct Call Now
                   </Button>
                 </div>
               </motion.div>

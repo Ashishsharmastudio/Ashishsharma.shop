@@ -37,6 +37,7 @@ export const projects: Project[] = [
       author: "D. Saini",
       role: "Lead Lease Auditor, Harborview Asset Operations",
     },
+    liveUrl: 'https://audit-trust-hitl-git-main-my-team-7bacae96.vercel.app/',
   },
   {
     id: 'reset-pods',
@@ -73,6 +74,7 @@ export const projects: Project[] = [
       author: "Tatiana Lopukhova",
       role: "Founder, Corporate Recovery Co.",
     },
+    liveUrl: 'https://rest-pods-new-al67.vercel.app/benefits',
   },
   {
     id: 'freight-brokerage-hitl-dispatch',

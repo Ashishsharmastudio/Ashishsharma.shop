@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { trackPageView } from './analytics';
 
 interface RouterContextType {
   path: string;
@@ -10,10 +11,21 @@ const RouterContext = createContext<RouterContextType | undefined>(undefined);
 export function RouterProvider({ children }: { children: ReactNode }) {
   const [path, setPath] = useState(window.location.pathname || '/');
 
+  // Initial pageview on mount
+  useEffect(() => {
+    trackPageView(window.location.pathname, document.title);
+  }, []);
+
   useEffect(() => {
     const handlePopState = () => {
-      setPath(window.location.pathname);
+      const currentPath = window.location.pathname;
+      setPath(currentPath);
       window.scrollTo(0, 0);
+
+      // Track back/forward browser navigation
+      setTimeout(() => {
+        trackPageView(currentPath, document.title);
+      }, 50);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -25,6 +37,11 @@ export function RouterProvider({ children }: { children: ReactNode }) {
       window.history.pushState(null, '', to);
       setPath(to);
       window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Track client-side navigation pageview
+      setTimeout(() => {
+        trackPageView(to, document.title);
+      }, 50);
     }
   };
 
@@ -43,10 +60,6 @@ export function useRouter() {
   return context;
 }
 
-/**
- * Custom Link Component that intercepts default click actions
- * to provide smooth client-side SPA routing.
- */
 interface LinkProps {
   href: string;
   children: ReactNode;
@@ -54,17 +67,30 @@ interface LinkProps {
   activeClassName?: string;
   id?: string;
   key?: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export function Link({ href, children, className = '', activeClassName = '', id }: LinkProps) {
+export function Link({
+  href,
+  children,
+  className = '',
+  activeClassName = '',
+  id,
+  onClick,
+}: LinkProps) {
   const { path, navigate } = useRouter();
-  
-  // Check if link matches active route
+
   const isActive = path === href || (href !== '/' && path.startsWith(href));
-  
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate(href);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      onClick(e);
+    }
+    // Only intercept local relative routes
+    if (href.startsWith('/') && !href.startsWith('//')) {
+      e.preventDefault();
+      navigate(href);
+    }
   };
 
   return (
