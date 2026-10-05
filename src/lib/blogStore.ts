@@ -14,49 +14,70 @@ export interface Blog {
 }
 
 export const getBlogs = async (publishedOnly = false): Promise<Blog[]> => {
-  const url = publishedOnly ? '/api/blogs?published=true' : '/api/blogs';
-  const response = await fetch(url);
+  const queryParam = publishedOnly ? '?published=true' : '';
+  
+  // Try primary /api/blogs endpoint, fallback to /blogs
+  let response = await fetch(`/api/blogs${queryParam}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch blogs');
+    response = await fetch(`/blogs${queryParam}`);
   }
+
+  if (!response.ok) {
+    throw new Error('Failed to load published articles from system database.');
+  }
+
   return response.json();
 };
 
 export const getBlogById = async (idOrSlug: string): Promise<Blog | null> => {
-  const response = await fetch(`/api/blogs/${idOrSlug}`);
+  let response = await fetch(`/api/blogs/${encodeURIComponent(idOrSlug)}`);
+  if (!response.ok && response.status !== 404) {
+    response = await fetch(`/blogs/${encodeURIComponent(idOrSlug)}`);
+  }
+
   if (response.status === 404) {
     return null;
   }
+
   if (!response.ok) {
-    throw new Error('Failed to fetch blog');
+    throw new Error('Failed to fetch article details.');
   }
+
   return response.json();
 };
 
-export const saveBlog = async (blogData: Omit<Blog, '_id' | 'views' | 'totalTimeSpent' | 'createdAt'> & { _id?: string }): Promise<Blog> => {
+export const saveBlog = async (
+  blogData: Omit<Blog, '_id' | 'views' | 'totalTimeSpent' | 'createdAt'> & { _id?: string }
+): Promise<Blog> => {
   const isEditing = !!blogData._id;
   const url = isEditing ? `/api/blogs/${blogData._id}` : '/api/blogs';
   const method = isEditing ? 'PUT' : 'POST';
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(blogData),
   });
 
+  if (!response.ok && isEditing) {
+    response = await fetch(`/blogs/${blogData._id}`, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(blogData),
+    });
+  }
+
   if (!response.ok) {
-    throw new Error('Failed to save blog');
+    throw new Error('Failed to save blog post to database.');
   }
 
   return response.json();
 };
 
 export const deleteBlog = async (id: string): Promise<boolean> => {
-  const response = await fetch(`/api/blogs/${id}`, {
-    method: 'DELETE',
-  });
-
+  let response = await fetch(`/api/blogs/${id}`, { method: 'DELETE' });
+  if (!response.ok) {
+    response = await fetch(`/blogs/${id}`, { method: 'DELETE' });
+  }
   return response.ok;
 };

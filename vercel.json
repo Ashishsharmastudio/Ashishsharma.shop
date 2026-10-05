@@ -7,6 +7,14 @@
       "destination": "/api/sitemap"
     },
     {
+      "source": "/blog",
+      "destination": "/api/render-blog-list"
+    },
+    {
+      "source": "/blog/",
+      "destination": "/api/render-blog-list"
+    },
+    {
       "source": "/blog/:slug",
       "destination": "/api/render-blog?slug=:slug"
     },

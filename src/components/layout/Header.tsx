@@ -1,35 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useRouter, Link } from '../../lib/router';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Button from '../ui/Button';
 
 export default function Header() {
-  const { path, navigate } = useRouter();
+  const { path } = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on navigate
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [path]);
 
   const navLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'Work', href: '/work' },
-    { label: 'Services', href: '/services' },
-    { label: 'Lab', href: '/lab' },
-    { label: 'Blog', href: '/blog' },
+    { label: 'Overview', href: '/' },
+    { label: 'Work & Proof', href: '/work' },
+    { label: 'Capabilities', href: '/services' },
+    { label: 'Insights & Blog', href: '/blog' },
+    { label: 'R&D Benchmarks', href: '/lab' },
     { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' }
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -42,18 +41,13 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Logo / Wordmark */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 group focus:outline-none"
-          >
+          <Link href="/" className="flex items-center gap-2 group focus:outline-none">
             <span className="font-display font-bold text-lg md:text-xl tracking-tight text-white flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-studio-accent group-hover:scale-125 transition-transform duration-300" />
               ASHISH SHARMA<span className="text-studio-accent font-mono font-normal">//</span>
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = path === link.href || (link.href !== '/' && path.startsWith(link.href));
@@ -78,24 +72,22 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Right Header Action */}
           <div className="hidden md:flex items-center gap-4">
             <Button
               variant="outline"
-              href="/contact"
+              href="https://cal.com/ashish-sharma-2000"
               showArrow
               className="text-xs py-2 px-5 hover:bg-studio-text-primary hover:text-studio-bg"
             >
-              Start a Project
+              Book Systems Call
             </Button>
           </div>
 
-          {/* Mobile Menu Icon */}
           <div className="flex md:hidden items-center gap-3">
             <Button
               variant="primary"
               href="/contact"
-              className="text-xs py-2 px-4.5 rounded-full"
+              className="text-xs py-2 px-4 rounded-full"
             >
               Start
             </Button>
@@ -110,7 +102,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mobile Fullscreen Animated Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -120,14 +111,11 @@ export default function Header() {
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 bg-studio-bg z-40 pt-28 px-6 pb-12 flex flex-col justify-between overflow-y-auto"
           >
-            {/* Grain overlay */}
-            <div className="absolute inset-0 noise-bg opacity-[0.02] pointer-events-none" />
-
-            <div className="max-w-md mx-auto w-full flex flex-col gap-10">
+            <div className="max-w-md mx-auto w-full flex flex-col gap-8">
               <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-studio-accent block border-b border-studio-border pb-4">
-                // Operations
+                // Operational Systems Engineering
               </span>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-5">
                 {navLinks.map((link, idx) => {
                   const isActive = path === link.href || (link.href !== '/' && path.startsWith(link.href));
                   return (
@@ -135,11 +123,11 @@ export default function Header() {
                       key={link.href}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + idx * 0.05, duration: 0.4 }}
+                      transition={{ delay: 0.08 + idx * 0.04, duration: 0.4 }}
                     >
                       <Link
                         href={link.href}
-                        className={`text-4xl font-display font-medium block relative py-1 focus:outline-none ${
+                        className={`text-3xl font-display font-medium block relative py-1 focus:outline-none ${
                           isActive ? 'text-studio-accent' : 'text-studio-text-primary hover:text-studio-accent'
                         }`}
                       >
@@ -158,11 +146,11 @@ export default function Header() {
               </div>
               <Button
                 variant="primary"
-                href="/contact"
+                href="https://cal.com/ashish-sharma-2000"
                 showArrow
                 className="w-full justify-center py-4 text-base"
               >
-                Start a Project
+                Schedule Architecture Review
               </Button>
             </div>
           </motion.div>
@@ -171,5 +159,3 @@ export default function Header() {
     </>
   );
 }
-
-

@@ -2,75 +2,75 @@ import { Service } from '../types';
 
 export const services: Service[] = [
   {
-    id: 'ai-product-development',
+    id: 'workflow-to-system-engineering',
     number: '01',
-    title: 'AI Product Development',
-    description: 'AI-native products, intelligent features, LLM integrations, and production-ready AI experiences.',
+    title: 'Workflow-to-System Engineering',
+    description: 'Converting high-friction operational workflows, manual email coordination, and spreadsheets into custom deterministic software systems.',
     details: [
-      'Custom LLM fine-tuning and system configuration',
-      'Retrieval-Augmented Generation (RAG) pipelines',
-      'Semantic and vector database search implementation',
-      'AI visual, conversational, and voice interface designs'
-    ]
+      'Comprehensive manual process teardowns & state modeling',
+      'Deterministic state machines replacing tribal knowledge',
+      'Automated handoff protocols with replayable audit trails',
+      'Linear margin & price boundary enforcement algorithms',
+    ],
   },
   {
-    id: 'ux-ui-design',
+    id: 'hitl-agentic-systems',
     number: '02',
-    title: 'UX / UI Design',
-    description: 'Research-driven interfaces, product strategy, wireframes, prototypes, and scalable design systems.',
+    title: 'Human-in-the-Loop Agentic Systems',
+    description: 'Autonomous execution engines paired with low-latency exception review tables where human operators sign off on borderline decisions.',
     details: [
-      'Deep user research, persona modeling, and user testing',
-      'Interactive wireframes and rapid clickable prototypes',
-      'Scalable design systems for Figma and Tailwind CSS',
-      'Aesthetic typography selection and visual layouts'
-    ]
+      'Fast-path sub-second execution for nominal transactions',
+      'Thresholded escalation tables with pre-calculated diffs',
+      'Single-click SSO/WebAuthn approvals for senior operators',
+      'Hallucination-free action execution via typed schemas',
+    ],
   },
   {
-    id: 'full-stack-engineering',
+    id: 'document-spec-extraction',
     number: '03',
-    title: 'Full-Stack Engineering',
-    description: 'High-performance frontends, scalable backends, APIs, databases, authentication, and cloud deployment.',
+    title: 'Zero-Hallucination Document Pipelines',
+    description: 'Transforming messy multi-page PDF rate confirmations, technical specs, and clinical intake forms into strictly validated Pydantic models.',
     details: [
-      'Next.js, React, and Vite frontend architectures',
-      'Fast, secure Express, NestJS, or Node.js APIs',
-      'Robust SQL (PostgreSQL, MySQL) and NoSQL database structures',
-      'State-of-the-art serverless functions and CDN setups'
-    ]
+      'Multi-pass AST token coordinate reconciliation',
+      'Mathematical parity verification (sums equal grand total)',
+      'Deterministic schema validation with immediate circuit breakers',
+      'High-throughput asynchronous ingestion queues via Redis',
+    ],
   },
   {
-    id: 'ai-agents-automation',
+    id: 'legacy-system-connectors',
     number: '04',
-    title: 'AI Agents & Automation',
-    description: 'Intelligent agents and automated workflows connected to the tools businesses already use.',
+    title: 'Legacy TMS & ERP Connectors',
+    description: 'Bridging modern autonomous software with legacy enterprise backbones (McLeod, TMW, SAP, Epic, Salesforce) without brittle browser RPA.',
     details: [
-      'LangGraph & LangChain multi-agent orchestration',
-      'Custom browser automation and data extraction systems',
-      'Self-healing workflows that handle exceptions autonomously',
-      'Autonomous client support and outbound pipeline systems'
-    ]
+      'Event-driven webhook buffers and idempotent queue workers',
+      'Direct database synchronization with rollback safety',
+      'Distributed Redis leasing to eliminate ghost race conditions',
+      'Elimination of manual re-keying between disconnected tools',
+    ],
   },
   {
-    id: 'ai-content-systems',
+    id: 'realtime-voice-ai-gateways',
     number: '05',
-    title: 'AI Content Systems',
-    description: 'Scalable systems for generating and managing on-brand digital content.',
+    title: 'Sub-500ms Voice AI Gateways',
+    description: 'Deploying realtime conversational voice agents on top of existing enterprise PBX and SIP phone trunks for autonomous triage and dispatch.',
     details: [
-      'Dynamic automated copywriting pipelines',
-      'AI-assisted batch imagery and video generation pipelines',
-      'Brand style and tone calibration across digital outputs',
-      'Headless CMS integrations (Sanity, Strapi, Contentful)'
-    ]
+      'SIP-to-WebRTC audio transcoding pipelines (mu-law to Opus)',
+      'Interruption-aware Turn Detection with sub-300ms latency',
+      'Direct database lookup during active phone conversations',
+      'Instant warm-transfer escalation to human specialists',
+    ],
   },
   {
-    id: 'workflow-integrations',
+    id: 'operational-telemetry-optimization',
     number: '06',
-    title: 'Workflow & Integrations',
-    description: 'APIs, webhooks, CRM integrations, automation platforms, and custom business workflows.',
+    title: 'Operational Telemetry & Governance',
+    description: 'Real-time observability platforms tracking transaction velocity, operator override frequency, and automated throughput.',
     details: [
-      'Zapier, Make, and custom webhook logic builds',
-      'HubSpot, Salesforce, and Zoho API integrations',
-      'Real-time Slack, Discord, and Teams notification structures',
-      'Performance and sync audit across decentralized tools'
-    ]
-  }
+      'Granular latency and cost-per-transaction telemetry',
+      'Operator decision auditing to improve autonomous confidence',
+      'Strict SOC 2, HIPAA, and GDPR isolation patterns',
+      'Pushing touchless operations from 70% toward 95%',
+    ],
+  },
 ];
