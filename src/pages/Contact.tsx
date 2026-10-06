@@ -3,7 +3,7 @@ import SectionHeader from '../components/ui/SectionHeader';
 import { CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Button from '../components/ui/Button';
-import { trackProposalSubmission } from '../lib/analytics';
+import { trackProposalSubmission, trackCalBookingClick } from '../lib/analytics';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -58,9 +58,9 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Fire Key Conversion Event in GA4
+      // Fire Key Conversion Event in GA4 directly
       trackProposalSubmission(formData.projectType, formData.budget, formData.name);
 
       setIsSuccess(true);
@@ -102,6 +102,7 @@ export default function Contact() {
                   href="https://cal.com/ashish-sharma-2000"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackCalBookingClick('contact_sidebar_link')}
                   className="text-studio-accent underline ml-1"
                 >
                   cal.com/ashish-sharma-2000 ↗
@@ -281,6 +282,7 @@ export default function Contact() {
                   <Button
                     variant="primary"
                     href="https://cal.com/ashish-sharma-2000"
+                    onClick={() => trackCalBookingClick('contact_success_card_btn')}
                     showArrow
                   >
                     Schedule Direct Call Now

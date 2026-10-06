@@ -2,7 +2,7 @@ import { useRouter, Link } from '../lib/router';
 import { projects } from '../data/projects';
 import { ArrowLeft, ArrowUpRight, CheckCircle2, Github, ExternalLink } from 'lucide-react';
 import Button from '../components/ui/Button';
-import { trackLiveSandboxLaunch, trackGitHubInspection } from '../lib/analytics';
+import { trackLiveSandboxLaunch, trackGitHubInspection, trackCalBookingClick } from '../lib/analytics';
 
 interface CaseStudyProps {
   slug: string;

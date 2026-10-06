@@ -1,6 +1,6 @@
 /**
  * Google Analytics 4 & Google Tag Manager Event Tracking Utility.
- * Pushes structured B2B commercial conversion events to window.dataLayer.
+ * Dispatches directly to window.gtag and window.dataLayer.
  */
 
 declare global {
@@ -19,20 +19,24 @@ if (typeof window !== 'undefined') {
  * Dispatches a virtual pageview to GA4 on SPA route transitions.
  */
 export function trackPageView(path: string, title?: string) {
-  if (typeof window === 'undefined' || !window.dataLayer) return;
+  if (typeof window === 'undefined') return;
 
   const pageTitle = title || document.title;
   const pageLocation = window.location.origin + path;
 
-  window.dataLayer.push({
-    event: 'page_view',
-    page_path: path,
-    page_title: pageTitle,
-    page_location: pageLocation,
-  });
-
+  // 1. Direct GA4 delivery
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'page_view', {
+      page_path: path,
+      page_title: pageTitle,
+      page_location: pageLocation,
+    });
+  }
+
+  // 2. DataLayer fallback
+  if (window.dataLayer) {
+    window.dataLayer.push({
+      event: 'page_view',
       page_path: path,
       page_title: pageTitle,
       page_location: pageLocation,
@@ -44,16 +48,20 @@ export function trackPageView(path: string, title?: string) {
  * Generic event dispatcher.
  */
 export function trackEvent(eventName: string, params: Record<string, any> = {}) {
-  if (typeof window === 'undefined' || !window.dataLayer) return;
+  if (typeof window === 'undefined') return;
 
-  window.dataLayer.push({
-    event: eventName,
-    ...params,
-    timestamp: new Date().toISOString(),
-  });
-
+  // 1. Direct GA4 delivery
   if (typeof window.gtag === 'function') {
     window.gtag('event', eventName, params);
+  }
+
+  // 2. DataLayer fallback
+  if (window.dataLayer) {
+    window.dataLayer.push({
+      event: eventName,
+      ...params,
+      timestamp: new Date().toISOString(),
+    });
   }
 }
 
@@ -69,7 +77,7 @@ export function trackCalBookingClick(sourceLocation: string) {
     event_category: 'Conversion',
     event_label: 'Cal.com Systems Call',
     source_location: sourceLocation,
-    value: 500, // Assigned arbitrary lead value for GA4 optimization
+    value: 500,
     currency: 'USD',
   });
 }
