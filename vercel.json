@@ -23,11 +23,27 @@
       "destination": "/api/render-blog?slug=:slug"
     },
     {
-      "source": "/api/:path*",
+      "source": "/api/blogs/:path*",
       "destination": "/api/index"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/api/blogs",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/mcp/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/mcp",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/((?!assets/|favicon.ico|robots.txt|sitemap.xml|api/).*)",
       "destination": "/index.html"
     }
   ]
